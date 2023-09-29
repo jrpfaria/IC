@@ -37,10 +37,10 @@ class WAVHist {
 			counts[1][right_channel]++;
 
 			// MID channel (L + R) / 2
-			counts[2][((left_channel + right_channel) / 2) / bin_size]++;
+			counts[2][(int((left_channel + right_channel) / 2)/bin_size)*bin_size]++;
 			
 			// SIDE channel (L - R) / 2
-			counts[3][((left_channel - right_channel) / 2) / bin_size]++;
+			counts[3][(int((left_channel - right_channel) / 2)/bin_size)*bin_size]++;
 		}
 	}
 
