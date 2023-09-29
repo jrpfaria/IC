@@ -9,28 +9,25 @@
 class WAVHist {
   private:
 	std::vector<std::map<short, size_t>> counts;
-	std::size_t bin_sizes; // up to 2^16
 	std::size_t no_channel;
+	int bin_size;
 
   public:
-	WAVHist(const SndfileHandle& sfh, size_t bin_size) {
+	WAVHist(const SndfileHandle& sfh, int a_bin_size) {
 		no_channel = sfh.channels();
 		counts.resize(sfh.channels());
-		bin_sizes = bin_size;
+		bin_size = a_bin_size;
 
-		// insert new maps for SIDE and MID channels and set bin sizes for both
+		// insert new maps for SIDE and MID channels
 		if(sfh.channels() == 2)
 			for(int i = 0; i < 2; i++) {
-				counts.push_back(std::map<short, size_t>()); 
-				bin_sizes.push_back(bin_size);
+				counts.push_back(std::map<short, size_t>());
 			}
 	}
 
 	void update(const std::vector<short>& samples) {		
 		for(int i = 0; i < samples.size(); i += 2){
-			// -2^15 - 2^15 / 2^k = valor
-			// Fix to desired bin size
-			short left_channel = samples[i]; // divisão inteira por valor
+			short left_channel = samples[i];
 			short right_channel = samples[i+1];
 
 			// LEFT channel
@@ -40,13 +37,11 @@ class WAVHist {
 			counts[1][right_channel]++;
 
 			// MID channel (L + R) / 2
-			counts[2][(left_channel + right_channel) / 2]++;
+			counts[2][((left_channel + right_channel) / 2) / bin_size]++;
 			
 			// SIDE channel (L - R) / 2
-			counts[3][(left_channel - right_channel) / 2]++;
+			counts[3][((left_channel - right_channel) / 2) / bin_size]++;
 		}
-
-		//bin sizes
 	}
 
 	void dump(const size_t channel) const {
