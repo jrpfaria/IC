@@ -31,10 +31,10 @@ class WAVHist {
 			short right_channel = samples[i+1];
 
 			// LEFT channel
-			counts[0][left_channel]++;
+			counts[0][int(left_channel/bin_size)*bin_size]++;
 
 			// RIGHT channel 
-			counts[1][right_channel]++;
+			counts[1][int(right_channel/bin_size)*bin_size]++;
 
 			// MID channel (L + R) / 2
 			counts[2][(int((left_channel + right_channel) / 2)/bin_size)*bin_size]++;
