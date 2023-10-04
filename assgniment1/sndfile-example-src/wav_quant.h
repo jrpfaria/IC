@@ -11,12 +11,13 @@ class WAVQuant{
         std::vector<short> quant_samples;
 
     public:
-        WAVQuant()
+        WAVQuant(){
             quant_samples.resize(0);
+        }
 
         void quant(const std::vector<short>& samples, size_t quant) {
             for(auto entry : samples){
-                entry = samples >> quant;
+                entry = entry >> quant;
                 quant_samples.insert(quant_samples.end(), entry << quant);
             }
         }
@@ -24,6 +25,6 @@ class WAVQuant{
         void toFile(SndfileHandle sfhOut) const{
             sfhOut.write(quant_samples.data(), quant_samples.size());
         }
-}
+};
 
 #endif

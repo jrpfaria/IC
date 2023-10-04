@@ -4,7 +4,6 @@
 #include <sndfile.h>
 
 // Function to calculate L2 norm (average mean squared error) between 2 vectors
-// nao sei se é double ou int??
 double calculateL2Norm(const std::vector<double>& original, const std::vector<double>& modified) {
     double sum = 0.0;
     size_t numSamples = original.size();
