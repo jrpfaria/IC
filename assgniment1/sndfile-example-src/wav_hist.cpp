@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 		try {
 			bin_size = stoi(argv[3]);
 		}
-		catch (exception e) {
+		catch (const exception &) {
 			cerr << "Error: invalid bin size\n";
 			return 1;
 		}
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	}
-	catch (exception e) {
+	catch (const exception &) {
 		if (strcmp(argv[2], "mid")) {
 			channel = 2;
 		}
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
 	size_t nFrames;
 	vector<short> samples(FRAMES_BUFFER_SIZE * sndFile.channels());
-	WAVHist hist { sndFile, pow(2, bin_size) };
+	WAVHist hist { sndFile, int(pow(2, bin_size)) };
 	while((nFrames = sndFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
 		samples.resize(nFrames * sndFile.channels());
 		hist.update(samples);

@@ -26,7 +26,7 @@ class WAVHist {
 	}
 
 	void update(const std::vector<short>& samples) {		
-		for(int i = 0; i < samples.size(); i += 2){
+		for(int i = 0; i < int(samples.size()); i += 2){
 			short left_channel = samples[i];
 			short right_channel = samples[i+1];
 
