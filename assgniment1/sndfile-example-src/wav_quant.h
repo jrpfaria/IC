@@ -9,16 +9,18 @@
 class WAVQuant{
     private: 
         std::vector<short> quant_samples;
+        int btc;
 
     public:
-        WAVQuant(){
-            quant_samples.resize(0);
+        WAVQuant(int quant){
+            btc = quant;
         }
 
-        void quant(const std::vector<short>& samples, size_t quant) {
-            for(auto entry : samples){
-                entry = entry >> quant;
-                quant_samples.insert(quant_samples.end(), entry << quant);
+        void update(const std::vector<short>& samples) {
+            for(short entry: samples){
+                entry = entry >> btc;
+                entry = entry << btc;
+                quant_samples.insert(quant_samples.end(), entry);
             }
         }
 
