@@ -18,8 +18,8 @@ class WAVQuant{
 
         void update(const std::vector<short>& samples) {
             for(short entry: samples){
-                entry = entry >> btc;
-                entry = entry << btc;
+                entry >>= btc;
+                entry <<= btc;
                 quant_samples.insert(quant_samples.end(), entry);
             }
         }
