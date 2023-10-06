@@ -31,7 +31,7 @@ class WAVEffects {
 				created.resize(original.size() + delta*repetitions);
 				for (int i = 0; i < original.size(); i++) {
 					for (int j = 0; j <= repetitions; j++) {
-						created[i + j*delta] += original[i]*pow(proportion, j);
+						created[i + 2*j*delta] += original[i]*pow(proportion, j);
 					}
 				}
 				break;
