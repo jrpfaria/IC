@@ -32,7 +32,6 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    // supostamente temos de fazer isto antes de poder usar na quant ainnda nao percebi pq
     vector<short> audioSamples(inputFile.frames());
     inputFile.readf(audioSamples.data(), audioSamples.size());
 
