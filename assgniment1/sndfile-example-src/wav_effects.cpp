@@ -3,6 +3,9 @@
 #include <cmath>
 #include <sndfile.hh>
 
+using namespace std;
+constexpr size_t FRAMES_BUFFER_SIZE = 65536; // Buffer for reading frames
+
 int main(int argc, char *argv[]){
 
     // check number of args
@@ -20,11 +23,11 @@ int main(int argc, char *argv[]){
 
     SndfileHandle outputFile { argv[2], SFM_WRITE, inputFile.format(), inputFile.channels(), inputFile.samplerate() };
     if (not outputFile){
-        std::cerr << "Error creating output file.";
+        cerr << "Error creating output file.";
         return 1;
     }
     
-    effect = argv[3];
+    string effect = argv[3];
     if (effect != "single_echo" || effect != "mult_echo" || effect != "amp_mod" || effect != "time_delay"){
         cerr << "Invalid Effect!\nPossible effects: single_echo, mult_echo, amp_mod, time_delay!";
         return 1;
@@ -32,14 +35,19 @@ int main(int argc, char *argv[]){
 
     size_t nFrames;
     vector<short> samples(FRAMES_BUFFER_SIZE * inputFile.channels());
+    vector<short> samplesOut;
+    samplesOut.resize(0);
     short sampleOut;
+
+    int delay;
+    float gain;
     //  A single echo
     if (effect == "single_echo" || effect == "mult_echo"){
         
         try{
-            int delay = std::atoi(argv[argc-2]);
-            float gain = std::atoi(argv[argc-1]);
-        } catch{
+            delay = std::atoi(argv[argc-2]);
+            gain = std::atof(argv[argc-1]);
+        } catch(exception &err){
             cerr << "Invalid arguments!";
             return 1;
         }
@@ -50,7 +58,7 @@ int main(int argc, char *argv[]){
                 for (int i = 0; i < (int)samples.size(); i++){
                     if (i >= delay){
                         sampleOut = (samples.at(i) + gain * samples.at(i-delay)) / (1 + gain);
-                    }
+                    }else{sampleOut = samples.at(i);}
                 }
             }
         } else if (effect == "mult_echo"){
@@ -59,7 +67,7 @@ int main(int argc, char *argv[]){
                 for (int i = 0; i < (int)samples.size(); i++){
                     if (i >= delay){
                         sampleOut = (samples.at(i) + gain * samplesOut.at(i - delay)) / (1 + gain);
-                    }
+                    }else{sampleOut = samples.at(i);}
                 }
             }
         }
@@ -70,9 +78,11 @@ int main(int argc, char *argv[]){
     //  Amplitude modulation
     else if (effect == "amp_mod") {
         
+        float gainn;
+
         try{
-            float gainn = std::atoi(argv[argc-1]);
-        } catch{
+            gainn = std::atoi(argv[argc-1]);
+        } catch(exception &err){
             cerr << "Invalid arguments!";
             return 1;
         }
