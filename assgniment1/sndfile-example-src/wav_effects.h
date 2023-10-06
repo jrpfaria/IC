@@ -10,7 +10,7 @@ using namespace std;
 
 class WAVEffects {
   private:
-	std::vector<short> samples;
+	std::vector<short> original;
 	std::vector<short> created;
 
   public:
