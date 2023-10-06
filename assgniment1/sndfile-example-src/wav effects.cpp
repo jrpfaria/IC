@@ -32,13 +32,13 @@ int main(int argc, char *argv[]){
 
     size_t nFrames;
     vector<short> samples(FRAMES_BUFFER_SIZE * inputFile.channels());
-    
+    short sampleOut;
     //  A single echo
     if (effect == "single_echo" || effect == "mult_echo"){
         
         try{
             int delay = std::atoi(argv[argc-2]);
-            float gainn = std::atoi(argv[argc-1]);
+            float gain = std::atoi(argv[argc-1]);
         } catch{
             cerr << "Invalid arguments!";
             return 1;
@@ -47,13 +47,28 @@ int main(int argc, char *argv[]){
         if (effect == "single_echo"){
             while((nFrames = inputFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
                 samples.resize(nFrames * inputFile.channels());
-                
+                for (int i = 0; i < (int)samples.size(); i++){
+                    if (i >= delay){
+                        sampleOut = (samples.at(i) + gain * samples.at(i-delay)) / (1 + gain);
+                    }
                 }
+            }
+        } else if (effect == "mult_echo"){
+            while((nFrames = inputFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
+                samples.resize(nFrames * inputFile.channels());
+                for (int i = 0; i < (int)samples.size(); i++){
+                    if (i >= delay){
+                        sampleOut = (samples.at(i) + gain * samplesOut.at(i - delay)) / (1 + gain);
+                    }
+                }
+            }
         }
 
-        
-    //  Multiple echos
-    } else if (effect == "amp_mod") {
+        samplesOut.insert(samplesOut.end(), sampleOut);
+
+    } 
+    //  Amplitude modulation
+    else if (effect == "amp_mod") {
         
         try{
             float gainn = std::atoi(argv[argc-1]);
@@ -66,8 +81,10 @@ int main(int argc, char *argv[]){
             samples.resize(nFrames * inputFile.channels());
             
         }
+    
+    } 
     //  Time-varying delays
-    } else if (effect == "time_delay"){
+    else if (effect == "time_delay"){
         
         while((nFrames = inputFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
             samples.resize(nFrames * inputFile.channels());
