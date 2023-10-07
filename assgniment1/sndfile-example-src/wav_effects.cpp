@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <sndfile.hh>
+#include "wav_effects.h"
 
 using namespace std;
 constexpr size_t FRAMES_BUFFER_SIZE = 65536; // Buffer for reading frames
@@ -10,7 +11,7 @@ int main(int argc, char *argv[]){
 
     // check number of args
     if(argc < 4){
-        cerr << "Usage: " << argv[0] << " <input file> <output file> <effect> <fequency | delay> <gain>";
+        cerr << "Usage: " << argv[0] << " <input file> <output file> <effect> <parameters>";
         return 1;
     }
 
@@ -27,18 +28,32 @@ int main(int argc, char *argv[]){
         return 1;
     }
     
-    string effect = argv[3];
-    if (effect != "single_echo" || effect != "mult_echo" || effect != "amp_mod" || effect != "time_delay"){
-        cerr << "Invalid Effect!\nPossible effects: single_echo, mult_echo, amp_mod, time_delay!";
+    int effect;
+    try {
+        effect = stoi(argv[3]);
+    }
+    catch (const exception &) {
+        cerr << "Invalid effect";
         return 1;
     }
+    char* parameters[argc-4];
+    std::copy(argv+4, argv+argc, parameters);
+
+    vector<short> audioSamples(inputFile.frames());
+    inputFile.readf(audioSamples.data(), audioSamples.size());
 
     size_t nFrames;
     vector<short> samples(FRAMES_BUFFER_SIZE * inputFile.channels());
-    vector<short> samplesOut;
-    samplesOut.resize(0);
-    short sampleOut;
-
+    WAVEffects effects { inputFile };
+    while((nFrames = inputFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
+		samples.resize(nFrames * inputFile.channels());
+		effects.update(samples);
+	}
+    effects.apply(effect, parameters);
+    effects.toFile(outputFile);
+    
+    return 0;
+    /*
     int delay;
     float gain;
     //  A single echo
@@ -102,6 +117,6 @@ int main(int argc, char *argv[]){
         }
     
     }
-    
+    */
 
 }

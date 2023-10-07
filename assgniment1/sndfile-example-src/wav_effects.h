@@ -10,11 +10,16 @@ using namespace std;
 
 class WAVEffects {
   private:
+	int channels;
+	int samplerate;
 	std::vector<short> original;
 	std::vector<short> created;
 
   public:
-	WAVEffects() {}
+	WAVEffects(const SndfileHandle& sfh) {
+		this->channels = sfh.channels();
+		this->samplerate = sfh.samplerate();
+	}
 
 	void update(const std::vector<short>& samples) {		
 		for (short entry: samples) {
@@ -25,25 +30,35 @@ class WAVEffects {
 	void apply(int effect, char* parameters[]) {
 		switch (effect) {
 			case 0: // echo
+			{	
 				int repetitions = stoi(parameters[0]);
-				int delta = stoi(parameters[1]);
-				double proportion = stoi(parameters[2])/100;
-				created.resize(original.size() + delta*repetitions);
-				for (int i = 0; i < original.size(); i++) {
+				int delta = stoi(parameters[1])*samplerate*channels;
+				double proportion = stod(parameters[2])/100;
+				cout << repetitions << "\n" << delta << "\n" << proportion << "\n";
+				created.resize(original.size() + repetitions*delta);
+				for (int i = 0; i < int(original.size()); i++) {
 					for (int j = 0; j <= repetitions; j++) {
-						created[i + 2*j*delta] += original[i]*pow(proportion, j);
+						created[i + j*delta] += short(original[i]*pow(proportion, j));
 					}
 				}
 				break;
+			}
+			case 1: // multiply amplitude
+			{
+				double proportion = stod(parameters[0])/100;
+				created.resize(original.size());
+				for (int i = 0; i < int(original.size()); i++) {
+					created[i] = short(original[i]*proportion);
+				}
+				break;
+			}
 			default:
 				break;
-		original = created;
-		created.resize(0);
 		}
 	}
 
 	void toFile(SndfileHandle sfhOut) const{
-        sfhOut.write(original.data(), original.size());
+        sfhOut.write(created.data(), created.size());
     }
 };
 
