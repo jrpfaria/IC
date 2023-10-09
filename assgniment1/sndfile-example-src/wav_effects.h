@@ -34,7 +34,6 @@ class WAVEffects {
 				int repetitions = stoi(parameters[0]);
 				int delta = stoi(parameters[1])*samplerate*channels;
 				double proportion = stod(parameters[2])/100;
-				cout << repetitions << "\n" << delta << "\n" << proportion << "\n";
 				created.resize(original.size() + repetitions*delta);
 				for (int i = 0; i < int(original.size()); i++) {
 					for (int j = 0; j <= repetitions; j++) {
