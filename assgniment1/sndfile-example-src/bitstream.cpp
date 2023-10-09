@@ -12,16 +12,16 @@ int main(int argc, char *argv[]) {
 
     fstream file;
     try {
-        file = fstream(argv[1]);
+        file = fstream(argv[1], std::fstream::in | std::fstream::out | std::fstream::binary);
     }
     catch (const exception &) {
         cerr << "Error: invalid file";
         return 1;
     }
-    
+
     BitStream bitstream { &file };
     int r;
-    bitstream.read(&r, 50);
+    bitstream.read(&r, 1);
     cout << r << "\n";
     return 0;
 }

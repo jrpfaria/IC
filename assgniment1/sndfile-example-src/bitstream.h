@@ -31,7 +31,8 @@ class BitStream {
             *value = 0;
             for (int i = 0; i < bits; i++) {
                 int bit;
-                *f >> bit;
+                bit = (*f).get();
+                cout << bit << "\n";
                 *value = (*value << 1) | bit;
             }
         }
