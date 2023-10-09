@@ -29,7 +29,7 @@ class WAVEffects {
 
 	void apply(int effect, char* parameters[]) {
 		switch (effect) {
-			case 0: // echo
+			case 0: // repetition
 			{	
 				int repetitions = stoi(parameters[0]);
 				int delta = stoi(parameters[1])*samplerate*channels;
@@ -40,6 +40,7 @@ class WAVEffects {
 						created[i + j*delta] += short(original[i]*pow(proportion, j));
 					}
 				}
+				created.resize(original.size());
 				break;
 			}
 			case 1: // multiply amplitude
