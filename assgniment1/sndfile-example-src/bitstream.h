@@ -1,11 +1,10 @@
 #ifndef BITSTREAM
 #define BITSTREAM
 
-#include <iostream>
 #include <vector>
 #include <math.h>
-#include <sndfile.hh>
 #include <fstream>
+#include <cassert>
 
 using namespace std;
 
@@ -27,14 +26,35 @@ class BitStream {
             }
         }
 
-        void read(int* value, int bits) {
-            *value = 0;
-            for (int i = 0; i < bits; i++) {
-                int bit;
-                bit = (*f).get();
-                cout << bit << "\n";
-                *value = (*value << 1) | bit;
+        vector<unsigned char> read(int n) {
+            assert (n>=0&&n<=64);
+            vector<unsigned char> result;
+            result.resize(n);
+            int bytes = floor(n/8);
+            int remaining = n%8;
+            unsigned char bits;
+            unsigned char b;
+            int s;
+            int i;
+            for (i = 0; i < bytes; i++) {
+                bits = (*f).get();
+                s = 8;
+                for (int j = 0; j < 8; j++) {
+                    s--;
+                    b = (bits>>s)&1;
+                    result[(i*8)+j] = b;
+                }
             }
+            if (remaining>0) {
+                bits = (*f).get();
+                s = 8;
+                for (int j = 0; j < remaining; j++) {
+                    s--;
+                    b = (bits>>s)&1;
+                    result[(i*8)+j] = b;
+                }
+            }
+            return result;
         }
 };
 

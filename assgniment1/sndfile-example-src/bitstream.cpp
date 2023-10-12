@@ -20,8 +20,10 @@ int main(int argc, char *argv[]) {
     }
 
     BitStream bitstream { &file };
-    int r;
-    bitstream.read(&r, 1);
-    cout << r << "\n";
+    std::vector<unsigned char> result = bitstream.read(64);
+    for (auto b: result) {
+        cout << int(b);
+    }
+    cout << "\n";
     return 0;
 }

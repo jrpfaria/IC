@@ -30,5 +30,5 @@ add_executable (wav_effects wav_effects.cpp)
 target_link_libraries (wav_effects sndfile)
 
 add_executable (bitstream bitstream.cpp)
-target_link_libraries (bitstream sndfile fftw3)
+target_link_libraries (bitstream)
 
