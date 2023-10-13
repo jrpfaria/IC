@@ -56,6 +56,21 @@ class BitStream {
             }
             return result;
         }
-};
+
+        void write(vector<unsigned char> bits){
+            int n = bits.size();
+            for (int i = 0; i < n; i++) {
+                unsigned char bit = bits[i] & 1;
+                int shift = 7 - (i % 8); 
+                unsigned char mask = bit << shift;
+                if (i % 8 == 0) {
+                    if (i > 0) {    
+                        f->put(bits[i - 8]);
+                    }
+                }
+                bits[i / 8] |= mask;
+            }
+        }
+    };
 
 #endif
