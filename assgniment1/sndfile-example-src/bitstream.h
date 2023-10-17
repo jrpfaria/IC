@@ -12,18 +12,12 @@ class BitStream {
     private: 
         fstream* f;
 
+        int index_byte;
+
     public:
         BitStream(fstream* f) {
             this->f = f;
-        }
-        
-        void write(int value, int bits) {
-            int mask = 1 << (bits - 1);
-            for (int i = 0; i < bits; i++) {
-                int bit = (value & mask) >> (bits - i - 1);
-                *f << bit;
-                mask >>= 1;
-            }
+            index_byte = 0;
         }
 
         vector<unsigned char> read(int n) {
@@ -57,18 +51,30 @@ class BitStream {
             return result;
         }
 
-        void write(vector<unsigned char> bits){
-            int n = bits.size();
-            for (int i = 0; i < n; i++) {
-                unsigned char bit = bits[i] & 1;
-                int shift = 7 - (i % 8); 
-                unsigned char mask = bit << shift;
-                if (i % 8 == 0) {
-                    if (i > 0) {    
-                        f->put(bits[i - 8]);
-                    }
+        void write(vector<int> bits){
+
+            int bit_counter = 0;
+
+            for (int n = bits.size(); n > 0; n--) {
+
+                // Quando maximo array (full_byte) completo dar reset
+                if (index_byte == 8){
+                    
+                    // passar full_byte (array de bits) para Byte
+                    
+                    //char full_byte = 
+                    //file.write(&full_byte,1)
+                    index_byte = 0;
                 }
-                bits[i / 8] |= mask;
+
+                // Começar array correspondente ao byte
+                if (index_byte == 0){
+                    full_byte = vector<int>(8);
+                }
+                buffer[index_byte] = bits[bit_counter]
+
+                index_byte++;
+                bit_counter++;
             }
         }
     };
