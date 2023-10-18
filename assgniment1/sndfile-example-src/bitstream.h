@@ -57,24 +57,37 @@ class BitStream {
 
             for (int n = bits.size(); n > 0; n--) {
 
-                // Quando maximo array (full_byte) completo dar reset
+                // Create byte with bits aray(when full) and add it to file 
                 if (index_byte == 8){
                     
-                    // passar full_byte (array de bits) para Byte
-                    
-                    //char full_byte = 
-                    //file.write(&full_byte,1)
+                    // create a char byte with 
+                    char byte = 0;
+                    for (int i = 0; i < 8; i++) {
+                        byte = (byte << 1) | full_byte[i];
+                    }
+                    file.write(&byte, 1);
                     index_byte = 0;
                 }
 
-                // Começar array correspondente ao byte
+                // Reset the byte array when after puting its values in the file
                 if (index_byte == 0){
                     full_byte = vector<int>(8);
                 }
-                buffer[index_byte] = bits[bit_counter]
+
+                // put bit in array (creating byte)
+                full_byte[index_byte] = bits[bit_counter]
 
                 index_byte++;
                 bit_counter++;
+            }
+
+            // If there are remaining bits in the last byte, write it
+            if (index_byte > 0) {
+                char byte = 0;
+                for (int i = 0; i < 8; i++) {
+                    byte = (byte << 1) | full_byte[i];
+                }
+                file.write(&byte, 1);
             }
         }
     };
