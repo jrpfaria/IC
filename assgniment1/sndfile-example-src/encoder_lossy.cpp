@@ -14,10 +14,10 @@ int main(int argc, char *argv[]) {
 	double dctFrac { 0.2 };
 
 	if(argc < 3) {
-		cerr << "Usage: wav_dct [ -v (verbose) ]\n";
+		cerr << "Usage: encoder_lossy [ -v (verbose) ]\n";
 		cerr << "               [ -bs blockSize (def 1024) ]\n";
 		cerr << "               [ -frac dctFraction (def 0.2) ]\n";
-		cerr << "               wavFileIn wavFileOut\n";
+		cerr << "               wavFileIn FileOut\n";
 		return 1;
 	}
 
@@ -54,13 +54,6 @@ int main(int argc, char *argv[]) {
 		cerr << "Error: file is not in PCM_16 format\n";
 		return 1;
 	}
-
-	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, sfhIn.format(),
-	  sfhIn.channels(), sfhIn.samplerate() };
-	if(sfhOut.error()) {
-		cerr << "Error: invalid output file\n";
-		return 1;
-    }
 
 	if(verbose) {
 		cout << "Input file has:\n";
@@ -101,21 +94,49 @@ int main(int argc, char *argv[]) {
 				x_dct[c][n * bs + k] = x[k] / (bs << 1);
 
 		}
+    
+    fstream fileOutput;
+    try {
+        fileOutput = fstream(argv[argc-1], std::fstream::out | std::fstream::binary);
+    }
+    catch (const exception &) {
+        fopen(argv[argc-1], "a");
+    }
+    BitStream bitstreamOutput { &fileOutput };
 
-	// Inverse DCT
-	fftw_plan plan_i = fftw_plan_r2r_1d(bs, x.data(), x.data(), FFTW_REDFT01, FFTW_ESTIMATE);
-	for(size_t n = 0 ; n < nBlocks ; n++)
-		for(size_t c = 0 ; c < nChannels ; c++) {
-			for(size_t k = 0 ; k < bs ; k++)
-				x[k] = x_dct[c][n * bs + k];
+    vector<unsigned char> bits;
 
-			fftw_execute(plan_i);
-			for(size_t k = 0 ; k < bs ; k++)
-				samples[(n * bs + k) * nChannels + c] = static_cast<short>(round(x[k]));
+    for (int i = 0; i < 15; i++) {
+        bits.push_back((bs>>(15-i))&1);
+    }
 
-		}
+    for (int i = 0; i < 15; i++) {
+        bits.push_back((nChannels>>(15-i))&1);
+    }
 
-	sfhOut.writef(samples.data(), sfhIn.frames());
+    for (int i = 0; i < 31; i++) {
+        bits.push_back((nFrames>>(31-i))&1);
+    }
+
+    for (int i = 0; i < 15; i++) {
+        bits.push_back((nBlocks>>(15-i))&1);
+    }
+
+    int samplerate = sfhIn.samplerate();
+    for (int i = 0; i < 15; i++) {
+        bits.push_back((samplerate>>(15-i))&1);
+    }
+
+    for (int i = 0; i < int(nChannels); i++) {
+        for (int j = 0; j < int(nBlocks * bs); j++) {
+            for (int k = 0; k < 31; k++) {
+                bits.push_back((int(x_dct[i][j])>>(31-k))&1);
+            }
+        }
+    }
+
+    bitstreamOutput.write(bits);
+    bitstreamOutput.close();
 	return 0;
 }
 
