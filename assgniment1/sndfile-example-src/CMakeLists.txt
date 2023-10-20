@@ -33,8 +33,14 @@ add_executable (bitstream bitstream.cpp)
 target_link_libraries (bitstream)
 
 add_executable (encoder encoder.cpp)
-target_link_libraries (bitstream)
+target_link_libraries (encoder)
 
 add_executable (decoder decoder.cpp)
-target_link_libraries (bitstream)
+target_link_libraries (decoder)
+
+add_executable (encoder_lossy encoder_lossy.cpp)
+target_link_libraries (encoder_lossy sndfile fftw3)
+
+add_executable (decoder_lossy decoder_lossy.cpp)
+target_link_libraries (decoder_lossy sndfile fftw3)
 
