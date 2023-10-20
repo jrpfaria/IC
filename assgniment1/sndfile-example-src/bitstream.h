@@ -11,13 +11,21 @@ using namespace std;
 class BitStream {
     private: 
         fstream* f;
-
-        int index_byte;
-
+        unsigned char buffer = 0;
+        int free = 8;
+    
     public:
         BitStream(fstream* f) {
             this->f = f;
-            index_byte = 0;
+        }
+
+        int size() {
+            int size = (*f).tellg();
+            (*f).seekg(0, std::ios::end);
+            size = int((*f).tellg())-size;
+            (*f).clear();
+            (*f).seekg(0);
+            return size;
         }
 
         vector<unsigned char> read(int n) {
@@ -51,43 +59,40 @@ class BitStream {
             return result;
         }
 
-        void write(vector<int> bits){
-
-            int bit_counter = 0;
-
-            for (int n = bits.size(); n > 0; n--) {
-
-                // Create byte with bits aray(when full) and add it to file 
-                if (index_byte == 8){
-                    
-                    // create a char byte with 
-                    char byte = 0;
-                    for (int i = 0; i < 8; i++) {
-                        byte = (byte << 1) | full_byte[i];
-                    }
-                    file.write(&byte, 1);
-                    index_byte = 0;
-                }
-
-                // Reset the byte array when after puting its values in the file
-                if (index_byte == 0){
-                    full_byte = vector<int>(8);
-                }
-
-                // put bit in array (creating byte)
-                full_byte[index_byte] = bits[bit_counter]
-
-                index_byte++;
-                bit_counter++;
+        string readString(int n) {
+            string result = "";
+            for (int i = 0; i < n; i++) {
+                result += (*f).get();
             }
+            return result;
+        }
 
-            // If there are remaining bits in the last byte, write it
-            if (index_byte > 0) {
-                char byte = 0;
-                for (int i = 0; i < 8; i++) {
-                    byte = (byte << 1) | full_byte[i];
+        void write(unsigned char bit) {
+            buffer = buffer<<1;
+            buffer = buffer|bit;
+            free--;
+            if (free==0) {
+                char c = buffer;
+                (*f).write(&c, 1);
+                free = 8;
+            }
+        }
+
+        void write(vector<unsigned char> bits) {
+            int n = bits.size();
+            for (int i = 0; i < n; i++) {
+                write(bits[i]);
+            }
+        }
+
+        void write(string s) {
+            int l = s.length();
+            unsigned char bit;
+            for (int i = 0; i < l; i++) {
+                for (int j = 0; j < 8; j++) {
+                    bit = (s[i]>>(7-j))&1;
+                    write(bit);
                 }
-                file.write(&byte, 1);
             }
         }
     };
