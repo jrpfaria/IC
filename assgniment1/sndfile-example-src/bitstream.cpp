@@ -41,5 +41,7 @@ int main(int argc, char *argv[]) {
         std::vector<unsigned char> result = bitstreamInput.read(rem);
         bitstreamOutput.write(result);
     }
+    bitstreamInput.close();
+    bitstreamOutput.close();
     return 0;
 }

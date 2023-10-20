@@ -95,6 +95,11 @@ class BitStream {
                 }
             }
         }
+
+        void close() {
+            while (free!=8) write(0);
+            (*f).close();
+        }
     };
 
 #endif
