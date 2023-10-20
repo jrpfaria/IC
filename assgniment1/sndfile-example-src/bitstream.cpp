@@ -30,12 +30,11 @@ int main(int argc, char *argv[]) {
     BitStream bitstreamInput { &fileInput };
     BitStream bitstreamOutput { &fileOutput };
     int bits = bitstreamInput.size()*8;
-    if (bits >= 64) {
-        for (int i = 0; i < bits; i++) {
-            std::vector<unsigned char> result = bitstreamInput.read(64);
-            bitstreamOutput.write(result);
+    int chunks = bits/64;
+    for (int i = 0; i < chunks; i++) {
+        std::vector<unsigned char> result = bitstreamInput.read(64);
+        bitstreamOutput.write(result);
         }
-    }
     int rem = bits%64;
     if (rem>0) {
         std::vector<unsigned char> result = bitstreamInput.read(rem);
