@@ -32,3 +32,9 @@ target_link_libraries (wav_effects sndfile)
 add_executable (bitstream bitstream.cpp)
 target_link_libraries (bitstream)
 
+add_executable (encoder encoder.cpp)
+target_link_libraries (bitstream)
+
+add_executable (decoder decoder.cpp)
+target_link_libraries (bitstream)
+
