@@ -7,6 +7,41 @@
 
 using namespace std;
 
+int fillBit(int value, int n) {
+    int result = 0;
+
+    for (int i = 0; i < 32; ++i) {
+        // Shift nth bit of given value to ith position
+        int bit = (value >> n) & 1;
+
+        // Set ith bit of result to calculated bit
+        result |= (bit << i);
+    }
+
+    return result;
+}
+
+int CalculateBitsNeeded(const std::vector<std::vector<int>>& x_vector) {
+    int max_value = INT_MIN;  // Initialize max_value to the smallest possible value
+
+    // Find the maximum value in the 2D vector
+    for (const auto& row : x_vector) {
+        for (int value : row) {
+            if (value > max_value) {
+                max_value = value;
+            }
+        }
+    }
+
+    // Calculate the number of bits needed to represent the maximum value
+    int bits_needed = 0;
+    if (max_value > 0) {
+        bits_needed = static_cast<int>(log2(max_value)) + 1;
+    }
+
+    return bits_needed;
+}
+
 int main(int argc, char *argv[]) {
 
 	bool verbose { false };
