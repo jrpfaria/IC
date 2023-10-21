@@ -129,11 +129,12 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
-            for (int k = 0; k < 32; k++) {
-                bits.push_back((int(x_dct[i][j])>>(31-k))&1);
+            for (int k = 16; k < 30; k++) {
+                bits.push_back(((int(x_dct[i][j]))>>(31-k))&1);
             }
         }
     }
+	cout << int(x_dct[0][50]) << endl;
 
     bitstreamOutput.write(bits);
     bitstreamOutput.close();

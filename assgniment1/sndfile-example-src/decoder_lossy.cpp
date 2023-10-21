@@ -83,11 +83,14 @@ int main(int argc, char *argv[]) {
 	int n = 96;
 	for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
-            for (int k = 0; k < 32; k++) {
-				x_dct[i][j] += bits[n++]<<(31-k);
+			short int v = 0;
+            for (int k = 16; k < 30; k++) {
+				v += bits[n++]<<(31-k);
             }
+			x_dct[i][j] = v;
         }
     }
+	cout << int(x_dct[0][50]) << endl;
 	
 	// Vector for holding DCT computations
 	vector<double> x(bs);

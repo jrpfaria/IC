@@ -1,0 +1,4 @@
+#!/bin/bash
+make
+../sndfile-example-bin/encoder_lossy sample.wav encoded
+../sndfile-example-bin/decoder_lossy encoded sample2.wav
