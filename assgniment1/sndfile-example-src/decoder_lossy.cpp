@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
 	fstream fileInput;
     try {
-        fileInput = fstream(argv[argc-1], std::fstream::in | std::fstream::binary);
+        fileInput = fstream(argv[argc-2], std::fstream::in | std::fstream::binary);
     }
     catch (const exception &) {
         cerr << "Error: invalid input file\n";
@@ -24,9 +24,23 @@ int main(int argc, char *argv[]) {
     }
     BitStream bitstreamInput { &fileInput };
 
+	vector<unsigned char> bits;
 	int size = bitstreamInput.size()*8;
-	vector<unsigned char> bits = bitstreamInput.read(size);
-
+    int chunks = size/64;
+    for (int i = 0; i < chunks; i++) {
+        std::vector<unsigned char> read = bitstreamInput.read(64);
+		for (int i = 0; i < 64; i++) {
+			bits.push_back(read[i]);
+		}
+	}
+    int rem = size%64;
+    if (rem>0) {
+        std::vector<unsigned char> read = bitstreamInput.read(rem);
+		for (int i = 0; i < rem; i++) {
+			bits.push_back(read[i]);
+		}
+    }
+	
 	size_t bs = 0;
 	for (int i = 0; i < 16; i++) {
 		bs += bits[i]<<(15-i);
@@ -39,17 +53,17 @@ int main(int argc, char *argv[]) {
 
 	size_t nFrames = 0;
 	for (int i = 0; i < 32; i++) {
-		nFrames += bits[32+i]<<(32-i);
+		nFrames += bits[32+i]<<(31-i);
 	}
 
 	size_t nBlocks = 0;
 	for (int i = 0; i < 16; i++) {
-		nBlocks += bits[70+i]<<(15-i);
+		nBlocks += bits[64+i]<<(15-i);
 	}
 
 	int samplerate = 0;
 	for (int i = 0; i < 16; i++) {
-		samplerate += bits[86+i]<<(15-i);
+		samplerate += bits[80+i]<<(15-i);
 	}
 
 	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16,
