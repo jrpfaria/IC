@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
 	// Vector for holding all DCT coefficients, channel by channel
 	vector<vector<double>> x_dct(nChannels, vector<double>(nBlocks * bs));
-	int n = 80;
+	int n = 96;
 	for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
             for (int k = 0; k < 32; k++) {
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
+	
 	// Vector for holding DCT computations
 	vector<double> x(bs);
 
