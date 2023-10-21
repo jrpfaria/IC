@@ -9,50 +9,71 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-	// bool verbose { false };
-	// size_t bs { 1024 };
-	// double dctFrac { 0.2 };
-
 	if (argc < 3) {
 		cerr << "Usage: " << argv[0] << " <input file> <output file>\n";
 		return 1;
 	}
 
-	// get info from file (read bits)
-	string inputFile = argv[1];
-	BitStream bitstream(inputFile);
+	fstream fileInput;
+    try {
+        fileInput = fstream(argv[argc-1], std::fstream::in | std::fstream::binary);
+    }
+    catch (const exception &) {
+        cerr << "Error: invalid input file\n";
+		return 1;
+    }
+    BitStream bitstreamInput { &fileInput };
 
+	int size = bitstreamInput.size()*8;
+	vector<unsigned char> bits = bitstreamInput.read(size);
 
-	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, sfhIn.format(),
-	  sfhIn.channels(), sfhIn.samplerate() };
+	size_t bs = 0;
+	for (int i = 0; i < 16; i++) {
+		bs += bits[i]<<(15-i);
+	}
+
+	size_t nChannels = 0;
+	for (int i = 0; i < 16; i++) {
+		nChannels += bits[16+i]<<(15-i);
+	}
+
+	size_t nFrames = 0;
+	for (int i = 0; i < 32; i++) {
+		nFrames += bits[32+i]<<(32-i);
+	}
+
+	size_t nBlocks = 0;
+	for (int i = 0; i < 16; i++) {
+		nBlocks += bits[70+i]<<(15-i);
+	}
+
+	int samplerate = 0;
+	for (int i = 0; i < 16; i++) {
+		samplerate += bits[86+i]<<(15-i);
+	}
+
+	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16,
+	  int(nChannels), samplerate };
 	if(sfhOut.error()) {
 		cerr << "Error: invalid output file\n";
 		return 1;
     }
-	
-	/*if(verbose) {
-		cout << "Input file has:\n";
-		cout << '\t' << sfhIn.frames() << " frames\n";
-		cout << '\t' << sfhIn.samplerate() << " samples per second\n";
-		cout << '\t' << sfhIn.channels() << " channels\n";
-	}
 
-	size_t nChannels { static_cast<size_t>(sfhIn.channels()) };
-	size_t nFrames { static_cast<size_t>(sfhIn.frames()) };
-	*/
-	
-	// Read all samples: c1 c2 ... cn c1 c2 ... cn ...
-	// Note: A frame is a group c1 c2 ... cn
 	vector<short> samples(nChannels * nFrames);
-	sfhIn.readf(samples.data(), nFrames);
-
-	// size_t nBlocks { static_cast<size_t>(ceil(static_cast<double>(nFrames) / bs)) };
 
 	// Do zero padding, if necessary
 	samples.resize(nBlocks * bs * nChannels);
 
 	// Vector for holding all DCT coefficients, channel by channel
 	vector<vector<double>> x_dct(nChannels, vector<double>(nBlocks * bs));
+	int n = 80;
+	for (int i = 0; i < int(nChannels); i++) {
+        for (int j = 0; j < int(nBlocks * bs); j++) {
+            for (int k = 0; k < 32; k++) {
+				x_dct[i][j] += bits[n++]<<(31-k);
+            }
+        }
+    }
 
 	// Vector for holding DCT computations
 	vector<double> x(bs);
@@ -70,7 +91,7 @@ int main(int argc, char *argv[]) {
 
 		}
 
-	sfhOut.writef(samples.data(), sfhIn.frames());
+	sfhOut.writef(samples.data(), nFrames);
 	return 0;
 }
 

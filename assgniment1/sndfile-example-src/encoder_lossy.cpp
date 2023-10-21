@@ -106,30 +106,30 @@ int main(int argc, char *argv[]) {
 
     vector<unsigned char> bits;
 
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 16; i++) {
         bits.push_back((bs>>(15-i))&1);
     }
 
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 16; i++) {
         bits.push_back((nChannels>>(15-i))&1);
     }
 
-    for (int i = 0; i < 31; i++) {
+    for (int i = 0; i < 32; i++) {
         bits.push_back((nFrames>>(31-i))&1);
     }
 
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 16; i++) {
         bits.push_back((nBlocks>>(15-i))&1);
     }
 
     int samplerate = sfhIn.samplerate();
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 16; i++) {
         bits.push_back((samplerate>>(15-i))&1);
     }
 
     for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
-            for (int k = 0; k < 31; k++) {
+            for (int k = 0; k < 32; k++) {
                 bits.push_back((int(x_dct[i][j])>>(31-k))&1);
             }
         }
