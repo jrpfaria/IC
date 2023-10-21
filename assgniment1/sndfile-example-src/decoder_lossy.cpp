@@ -7,6 +7,17 @@
 
 using namespace std;
 
+int fillBit(int value, int n) {
+    int result = value;
+	int bit = (value>>n)&1;
+	if (bit==1) {
+		for (int i = n+1; i < 32; i++) {
+        	result |= (1<<i);
+    	}
+	}
+    return result;
+}
+
 int main(int argc, char *argv[]) {
 
 	if (argc < 3) {
@@ -66,6 +77,11 @@ int main(int argc, char *argv[]) {
 		samplerate += bits[80+i]<<(15-i);
 	}
 
+	int valueBits = 0;
+	for (int i = 0; i < 16; i++) {
+		valueBits += bits[96+i]<<(15-i);
+	}
+
 	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16,
 	  int(nChannels), samplerate };
 	if(sfhOut.error()) {
@@ -80,17 +96,16 @@ int main(int argc, char *argv[]) {
 
 	// Vector for holding all DCT coefficients, channel by channel
 	vector<vector<double>> x_dct(nChannels, vector<double>(nBlocks * bs));
-	int n = 96;
+	int n = 112;
 	for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
-			short int v = 0;
-            for (int k = 16; k < 30; k++) {
-				v += bits[n++]<<(31-k);
+			int v = 0;
+            for (int k = 0; k < valueBits; k++) {
+				v += bits[n++]<<(valueBits-1-k);
             }
-			x_dct[i][j] = v;
+			x_dct[i][j] = fillBit(v, valueBits-1);
         }
     }
-	cout << int(x_dct[0][50]) << endl;
 	
 	// Vector for holding DCT computations
 	vector<double> x(bs);

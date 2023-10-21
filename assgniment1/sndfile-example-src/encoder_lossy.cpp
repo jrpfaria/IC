@@ -7,39 +7,27 @@
 
 using namespace std;
 
-int fillBit(int value, int n) {
-    int result = 0;
+int getValueBits(vector<vector<double>> v) {
+	int min_value = INT32_MAX;
+    int max_value = INT32_MIN;
 
-    for (int i = 0; i < 32; ++i) {
-        // Shift nth bit of given value to ith position
-        int bit = (value >> n) & 1;
-
-        // Set ith bit of result to calculated bit
-        result |= (bit << i);
-    }
-
-    return result;
-}
-
-int CalculateBitsNeeded(const std::vector<std::vector<int>>& x_vector) {
-    int max_value = INT_MIN;  // Initialize max_value to the smallest possible value
-
-    // Find the maximum value in the 2D vector
-    for (const auto& row : x_vector) {
-        for (int value : row) {
+    for (auto row: v) {
+        for (int value: row) {
+			if (value < min_value) {
+                min_value = int(value);
+            }
             if (value > max_value) {
-                max_value = value;
+                max_value = int(value);
             }
         }
     }
-
-    // Calculate the number of bits needed to represent the maximum value
-    int bits_needed = 0;
-    if (max_value > 0) {
-        bits_needed = static_cast<int>(log2(max_value)) + 1;
+	
+    int valueBits = 0;
+    if (abs(min_value)>abs(max_value)) {
+        valueBits = static_cast<int>(log2(abs(min_value))) + 1;
     }
-
-    return bits_needed;
+	else valueBits = static_cast<int>(log2(max_value)) + 2;
+    return valueBits;
 }
 
 int main(int argc, char *argv[]) {
@@ -162,14 +150,18 @@ int main(int argc, char *argv[]) {
         bits.push_back((samplerate>>(15-i))&1);
     }
 
+	int valueBits = getValueBits(x_dct);
+    for (int i = 0; i < 16; i++) {
+        bits.push_back((valueBits>>(15-i))&1);
+    }
+
     for (int i = 0; i < int(nChannels); i++) {
         for (int j = 0; j < int(nBlocks * bs); j++) {
-            for (int k = 16; k < 30; k++) {
+            for (int k = 32-valueBits; k < 32; k++) {
                 bits.push_back(((int(x_dct[i][j]))>>(31-k))&1);
             }
         }
     }
-	cout << int(x_dct[0][50]) << endl;
 
     bitstreamOutput.write(bits);
     bitstreamOutput.close();
