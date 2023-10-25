@@ -32,7 +32,7 @@ class WAVEffects {
 			case 0: // repetition
 			{	
 				int repetitions = stoi(parameters[0]);
-				int delta = stoi(parameters[1])*samplerate*channels;
+				int delta = stod(parameters[1])*samplerate*channels;
 				double proportion = stod(parameters[2])/100;
 				created.resize(original.size() + repetitions*delta);
 				for (int i = 0; i < int(original.size()); i++) {
