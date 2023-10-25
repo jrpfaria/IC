@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 
     int btc = std::atoi(argv[argc-1]);
     if (btc < 1 || btc > 16){
-        cerr << "Invalid bits to keep!";
+        cerr << "Invalid bits to cut!";
         return 1;
     }
 
