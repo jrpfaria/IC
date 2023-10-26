@@ -42,13 +42,13 @@ int main(int argc, char *argv[]){
     vector<short> audioSamples(inputFile.frames());
     inputFile.readf(audioSamples.data(), audioSamples.size());
 
-    size_t nFrames;
-    vector<short> samples(FRAMES_BUFFER_SIZE * inputFile.channels());
+    size_t nChannels { static_cast<size_t>(inputFile.channels()) };
+	size_t nFrames { static_cast<size_t>(inputFile.frames()) };
+    vector<short> samples(nChannels * nFrames);
+	inputFile.readf(samples.data(), nFrames);
+	
     WAVEffects effects { inputFile };
-    while((nFrames = inputFile.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
-		samples.resize(nFrames * inputFile.channels());
-		effects.update(samples);
-	}
+    effects.update(samples);
     effects.apply(effect, parameters);
     effects.toFile(outputFile);
     

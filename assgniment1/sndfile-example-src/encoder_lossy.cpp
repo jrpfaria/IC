@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
         fileOutput = fstream(argv[argc-1], std::fstream::out | std::fstream::binary);
     }
     catch (const exception &) {
-        fopen(argv[argc-1], "a");
+        fclose(fopen(argv[argc-1], "a"));
     }
     BitStream bitstreamOutput { &fileOutput };
 

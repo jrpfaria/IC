@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         fileOutput = fstream(argv[2], std::fstream::out | std::fstream::binary);
     }
     catch (const exception &) {
-        fopen(argv[2], "a");
+        fclose(fopen(argv[2], "a"));
     }
     
     BitStream bitstreamInput { &fileInput };
