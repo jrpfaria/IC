@@ -39,9 +39,6 @@ int main(int argc, char *argv[]){
     char* parameters[argc-4];
     std::copy(argv+4, argv+argc, parameters);
 
-    vector<short> audioSamples(inputFile.frames());
-    inputFile.readf(audioSamples.data(), audioSamples.size());
-
     size_t nChannels { static_cast<size_t>(inputFile.channels()) };
 	size_t nFrames { static_cast<size_t>(inputFile.frames()) };
     vector<short> samples(nChannels * nFrames);
