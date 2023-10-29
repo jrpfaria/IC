@@ -53,10 +53,16 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	catch (const exception &) {
-		if (strcmp(argv[2], "mid")) {
+		if (!strcmp(argv[2], "left")) {
+			channel = 0;
+		}
+		else if (!strcmp(argv[2], "right")) {
+			channel = 1;
+		}
+		else if (!strcmp(argv[2], "mid")) {
 			channel = 2;
 		}
-		else if (strcmp(argv[2], "side")) {
+		else if (!strcmp(argv[2], "side")) {
 			channel = 3;
 		}
 		else {
