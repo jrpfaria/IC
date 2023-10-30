@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "ppm_effects.h"
 
 using namespace std;
 
