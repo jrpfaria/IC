@@ -1,5 +1,5 @@
-#ifndef WAVEFFECTS_H
-#define WAVEFFECTS_H
+#ifndef PPMEFFECTS_H
+#define PPMEFFECTS_H
 
 #include <iostream>
 #include <vector>
