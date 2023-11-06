@@ -84,22 +84,39 @@ class PPMEffects {
             cout << rotation << endl;
             Mat output = image;
             for (int i = 0; i < abs(rotation); i++)
-                output = rotation > 0 ? rotateLeft(output) : rotateRight(output);
+                output = rotation > 0 ? rotateLeft(output, angle) : rotateRight(output, angle);
             return output;
         }
 
-        static Mat rotateLeft(Mat image) {
+        static Mat rotateLeft(Mat image, int angle) {
             Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
             for (int i = 0; i < image.rows; i++)
                 for (int j = 0; j < image.cols; j++){
-                    result.at<Vec3b>(image.cols - j,image.rows - i)[0] = image.at<Vec3b>(i,j)[0];
-                    result.at<Vec3b>(image.cols - j,image.rows - i)[1] = image.at<Vec3b>(i,j)[1];
-                    result.at<Vec3b>(image.cols - j,image.rows - i)[2] = image.at<Vec3b>(i,j)[2];
+                    if (angle % 360 == 90) {
+                        result.at<Vec3b>(image.cols - 1 - j,i)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(image.cols - 1 - j,i)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(image.cols - 1 - j,i)[2] = image.at<Vec3b>(i, j)[2];
+
+                    } else if (angle % 360 == 180) {
+                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[2] = image.at<Vec3b>(i, j)[2];
+                    
+                    } else if (angle % 360 == 270) {
+                        result.at<Vec3b>(j, image.rows - 1 - i)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(j, image.rows - 1 - i)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(j, image.rows - 1 - i)[2] = image.at<Vec3b>(i, j)[2];
+                    
+                    } else if (angle % 360 == 0) {
+                        result.at<Vec3b>(i, j)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(i, j)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(i, j)[2] = image.at<Vec3b>(i, j)[2];
+                    }
                 }
             return result;
         }
 
-        static Mat rotateRight(Mat image) {
+        static Mat rotateRight(Mat image, int angle) {
             Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
             for (int i = 0; i < image.rows; i++)
                 for (int j = 0; j < image.cols; j++){

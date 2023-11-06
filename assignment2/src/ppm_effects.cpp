@@ -8,18 +8,54 @@ using namespace cv;
 
 int main(int argc, char *argv[]) {
     // check number of args
-    if (argc < 3) {
-        cerr << "Usage: " << argv[0] << " <input file> <output file> <channels>" << endl;
+    if (argc < 5) {
+        cerr << "Usage: " << argv[0] << " <input file> <output file> <channels> <effect> <extra>" << endl;
         return 1;
     }
 
     // read input file
-    Mat image = imread(argv[1], IMREAD_COLOR);
-    if (image.empty()) {
-        cerr << "Could not open or find the image" << endl;
-        return 1;
+    Mat inputImage = imread(argv[1]);
+        if (inputImage.empty()) {
+            std::cout << "Error reading input image file " << argv[1] << std::endl;
+            return 1;
+        }
+
+    string effect = argv[4];
+
+    PPMEffects result = PPMEffects(argv[3][0]);
+
+    Mat outputImage(inputImage.size(), CV_8UC3);
+
+    if (effect == "extract")
+    {
+        outputImage = result.extract(inputImage);
     }
 
+    else if (effect == "negate")
+    {
+        outputImage = result.negative(inputImage);
+    }
+
+    else if (effect == "mirror")
+    {
+        outputImage = result.mirror(inputImage, argv[5][0]);
+    }
+
+    else if (effect == "rotate")
+    {
+        outputImage = result.rotate(inputImage,stoi(argv[5]));
+    }
+
+    else if (effect == "light")
+    { 
+        outputImage = result.changeIntensity(inputImage,stod(argv[5]));
+    }
+    else
+    {
+        cerr << "Effect invalid! Available: extract, negate, mirror, rotate and light" << endl;
+        return 1;
+    }
+    
     // TO DO: switch case with argument in order to select which effect to use
     // extract channels
     // PPMEffects result = PPMEffects(argv[3][0]);
@@ -39,11 +75,11 @@ int main(int argc, char *argv[]) {
     // image = PPMEffects::changeIntensity(image, stof(argv[4]));
 
     // output image to ppm file
-    imwrite(argv[2], image);
+    imwrite(argv[2], outputImage);
 
     // display result
     namedWindow("Display window", WINDOW_AUTOSIZE);
-    imshow("Display window", image);
+    imshow("Display window", outputImage);
     waitKey(0);
 
     return 0;
