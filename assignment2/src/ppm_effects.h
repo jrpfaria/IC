@@ -42,7 +42,7 @@ class PPMEffects {
             return result;
         }
 
-        Mat negative(Mat image) {
+        static Mat negative(Mat image) {
             Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
             for (int i = 0; i < image.rows; i++)
                 for (int j = 0; j < image.cols; j++){
@@ -75,6 +75,48 @@ class PPMEffects {
                     result.at<Vec3b>(i,j)[0] = image.at<Vec3b>(image.rows - i,j)[0];
                     result.at<Vec3b>(i,j)[1] = image.at<Vec3b>(image.rows - i,j)[1];
                     result.at<Vec3b>(i,j)[2] = image.at<Vec3b>(image.rows - i,j)[2];
+                }
+            return result;
+        }
+
+        static Mat rotate(Mat image, int angle) {
+            int rotation = (angle / 90) % 4;
+            cout << rotation << endl;
+            Mat output = image;
+            for (int i = 0; i < abs(rotation); i++)
+                output = rotation > 0 ? rotateLeft(output) : rotateRight(output);
+            return output;
+        }
+
+        static Mat rotateLeft(Mat image) {
+            Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
+            for (int i = 0; i < image.rows; i++)
+                for (int j = 0; j < image.cols; j++){
+                    result.at<Vec3b>(image.cols - j,image.rows - i)[0] = image.at<Vec3b>(i,j)[0];
+                    result.at<Vec3b>(image.cols - j,image.rows - i)[1] = image.at<Vec3b>(i,j)[1];
+                    result.at<Vec3b>(image.cols - j,image.rows - i)[2] = image.at<Vec3b>(i,j)[2];
+                }
+            return result;
+        }
+
+        static Mat rotateRight(Mat image) {
+            Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
+            for (int i = 0; i < image.rows; i++)
+                for (int j = 0; j < image.cols; j++){
+                    result.at<Vec3b>(image.cols - j,i)[0] = image.at<Vec3b>(i,j)[0];
+                    result.at<Vec3b>(image.cols - j,i)[1] = image.at<Vec3b>(i,j)[1];
+                    result.at<Vec3b>(image.cols - j,i)[2] = image.at<Vec3b>(i,j)[2];
+                }
+            return result;
+        }
+
+        static Mat changeIntensity(Mat image, float intensity) {
+            Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
+            for (int i = 0; i < image.rows; i++)
+                for (int j = 0; j < image.cols; j++){
+                    result.at<Vec3b>(i,j)[0] = image.at<Vec3b>(i,j)[0] * intensity;
+                    result.at<Vec3b>(i,j)[1] = image.at<Vec3b>(i,j)[1] * intensity;
+                    result.at<Vec3b>(i,j)[2] = image.at<Vec3b>(i,j)[2] * intensity;
                 }
             return result;
         }

@@ -20,11 +20,23 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // TO DO: switch case with argument in order to select which effect to use
     // extract channels
     // PPMEffects result = PPMEffects(argv[3][0]);
     // image = result.extract(image);
 
-    image = PPMEffects::mirror(image, argv[4][0]);
+    // negative
+    // image = PPMEffects::negative(image);
+
+    // mirror image
+    // image = PPMEffects::mirror(image, argv[4][0]);
+
+    // rotate image
+    // image = PPMEffects::rotate(image, stoi(argv[4]));
+    // TO DO: fix rotate for |rotation| > 90
+
+    // change light intensity
+    // image = PPMEffects::changeIntensity(image, stof(argv[4]));
 
     // output image to ppm file
     imwrite(argv[2], image);
