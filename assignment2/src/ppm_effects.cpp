@@ -43,7 +43,12 @@ int main(int argc, char *argv[]) {
 
     else if (effect == "rotate")
     {
-        outputImage = result.rotate(inputImage,stoi(argv[5]));
+        int angle = stoi(argv[5]);
+        if (angle % 90 != 0) {
+            cerr << "Degrees to rotate must be a multiple of 90" << endl;
+            return 1;
+        }
+        outputImage = result.rotate(inputImage,angle);
     }
 
     else if (effect == "light")
@@ -52,7 +57,7 @@ int main(int argc, char *argv[]) {
     }
     else
     {
-        cerr << "Effect invalid! Available: extract, negate, mirror, rotate and light" << endl;
+        cerr << "Invalid effect! Available: extract, negate, mirror, rotate and light" << endl;
         return 1;
     }
     

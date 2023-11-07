@@ -80,50 +80,42 @@ class PPMEffects {
         }
 
         static Mat rotate(Mat image, int angle) {
-            int rotation = (angle / 90) % 4;
-            cout << rotation << endl;
-            Mat output = image;
-            for (int i = 0; i < abs(rotation); i++)
-                output = rotation > 0 ? rotateLeft(output, angle) : rotateRight(output, angle);
-            return output;
-        }
+            Mat result;
+            int width = image.cols;
+            int height = image.rows;
 
-        static Mat rotateLeft(Mat image, int angle) {
-            Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
-            for (int i = 0; i < image.rows; i++)
-                for (int j = 0; j < image.cols; j++){
+            if ((angle % 360 == 90) || (angle % 360 == 270)) {
+                result = Mat::zeros(width, height, CV_8UC3);
+            } else if (angle % 360 == 180) {
+                result = Mat::zeros(height, width, CV_8UC3);
+            } else {
+                result = image.clone();
+            }
+
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+
                     if (angle % 360 == 90) {
-                        result.at<Vec3b>(image.cols - 1 - j,i)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(image.cols - 1 - j,i)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(image.cols - 1 - j,i)[2] = image.at<Vec3b>(i, j)[2];
+                        result.at<Vec3b>(width - 1 - j, i)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(width - 1 - j, i)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(width - 1 - j, i)[2] = image.at<Vec3b>(i, j)[2];
 
                     } else if (angle % 360 == 180) {
-                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(image.cols - 1 - i, image.rows - 1 - j)[2] = image.at<Vec3b>(i, j)[2];
+                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[2] = image.at<Vec3b>(i, j)[2];
                     
                     } else if (angle % 360 == 270) {
-                        result.at<Vec3b>(j, image.rows - 1 - i)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(j, image.rows - 1 - i)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(j, image.rows - 1 - i)[2] = image.at<Vec3b>(i, j)[2];
-                    
-                    } else if (angle % 360 == 0) {
-                        result.at<Vec3b>(i, j)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(i, j)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(i, j)[2] = image.at<Vec3b>(i, j)[2];
+                        result.at<Vec3b>(j, height - 1 - i)[0] = image.at<Vec3b>(i, j)[0];
+                        result.at<Vec3b>(j, height - 1 - i)[1] = image.at<Vec3b>(i, j)[1];
+                        result.at<Vec3b>(j, height - 1 - i)[2] = image.at<Vec3b>(i, j)[2];
+
+                    } else {
+                        continue;
                     }
                 }
-            return result;
-        }
+            }
 
-        static Mat rotateRight(Mat image, int angle) {
-            Mat result = Mat::zeros(image.cols, image.rows, CV_8UC3);
-            for (int i = 0; i < image.rows; i++)
-                for (int j = 0; j < image.cols; j++){
-                    result.at<Vec3b>(image.cols - j,i)[0] = image.at<Vec3b>(i,j)[0];
-                    result.at<Vec3b>(image.cols - j,i)[1] = image.at<Vec3b>(i,j)[1];
-                    result.at<Vec3b>(image.cols - j,i)[2] = image.at<Vec3b>(i,j)[2];
-                }
             return result;
         }
 
