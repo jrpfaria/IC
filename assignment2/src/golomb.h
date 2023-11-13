@@ -12,12 +12,12 @@ using namespace cv;
 class Golomb {
     private:
 
-        int m_;
-        bool sign_and_magnitude_ = true;
+        int m;
+        bool sign_and_magnitude = true;
 
     public:
         Golomb(int m){
-            this->m_ = m;
+            this->m = m;
         }
 
         vector<bool> encode(int x) {
@@ -28,8 +28,8 @@ class Golomb {
 
             // Encode the absolute value of x.
             int abs_x = abs(x);
-            int quotient = abs_x / m_;
-            int remainder = abs_x % m_;
+            int quotient = abs_x / m;
+            int remainder = abs_x % m;
 
             // Encode the quotient as a unary code.
             for (int i = 0; i < quotient; i++) {
@@ -38,7 +38,7 @@ class Golomb {
             bits.push_back(false);
 
             // Encode the remainder in binary.
-            for (int i = m_ - 1; i >= 0; i--) {
+            for (int i = m - 1; i >= 0; i--) {
                 bits.push_back((remainder >> i) & 1);
             }
 
@@ -64,24 +64,24 @@ class Golomb {
             }
 
             // Decode the remainder from the binary code.
-            for (int j = 0; j < m_; j++) {
-                remainder |= bits[i + j] << (m_ - j - 1);
-            }
+            for (int j = 0; j < m; j++)
+                remainder |= bits[i + j] << (m - j - 1);
+            
 
-            x *= quotient * m_ + remainder;
+            x *= quotient * m + remainder;
 
             return x;
         }
 
-    // Sets the Golomb parameter, m.
-    void set_m(int m) {
-        m_ = m;
-    }
+        // Sets the Golomb parameter, m.
+        void set_m(int m) {
+            m = m;
+        }
 
-  // Sets the sign and magnitude encoding mode.
-  void set_sign_and_magnitude(bool sign_and_magnitude) {
-    sign_and_magnitude_ = sign_and_magnitude;
-  }
+        // Sets the sign and magnitude encoding mode.
+        void set_sign_and_magnitude(bool sign_and_magnitude) {
+            this->sign_and_magnitude = sign_and_magnitude;
+        }
 };
 
 

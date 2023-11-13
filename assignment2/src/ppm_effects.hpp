@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-namespace PPMEffects {
+namespace ppmeffects {
     static Mat extract(Mat image, char color) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC1);
         int ch = 0;

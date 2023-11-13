@@ -5,7 +5,7 @@
 
 using namespace std;
 using namespace cv;
-using namespace PPMEffects;
+using namespace ppmeffects;
 
 int main(int argc, char *argv[]) {
     // check number of args
