@@ -1,0 +1,3 @@
+/home/rodrigofaria/Desktop/MECT/IC/assignment2/src/build/CMakeFiles/ppm_effects.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment2/src/build/CMakeFiles/edit_cache.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment2/src/build/CMakeFiles/rebuild_cache.dir

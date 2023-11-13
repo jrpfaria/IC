@@ -1,10 +1,11 @@
 #include <iostream>
 #include <vector>
-#include "ppm_effects.h"
+#include "ppm_effects.hpp"
 #include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace cv;
+using namespace PPMEffects;
 
 int main(int argc, char *argv[]) {
     // check number of args
@@ -22,23 +23,25 @@ int main(int argc, char *argv[]) {
 
     string effect = argv[4];
 
-    PPMEffects result = PPMEffects(argv[3][0]);
-
     Mat outputImage(inputImage.size(), CV_8UC3);
 
     if (effect == "extract")
     {
-        outputImage = result.extract(inputImage);
+        if (argv[3][0] != 'b' && argv[3][0] != 'g' && argv[3][0] != 'r') {
+            cerr << "Invalid channel! Available: b, g and r" << endl;
+            return 1;
+        }
+        outputImage = extract(inputImage, argv[3][0]);
     }
 
     else if (effect == "negate")
     {
-        outputImage = result.negative(inputImage);
+        outputImage = negative(inputImage);
     }
 
     else if (effect == "mirror")
     {
-        outputImage = result.mirror(inputImage, argv[5][0]);
+        outputImage = mirror(inputImage, argv[5][0]);
     }
 
     else if (effect == "rotate")
@@ -48,12 +51,12 @@ int main(int argc, char *argv[]) {
             cerr << "Degrees to rotate must be a multiple of 90" << endl;
             return 1;
         }
-        outputImage = result.rotate(inputImage,angle);
+        outputImage = rotate(inputImage,angle);
     }
 
     else if (effect == "light")
     { 
-        outputImage = result.changeIntensity(inputImage,stod(argv[5]));
+        outputImage = changeIntensity(inputImage,stod(argv[5]));
     }
     else
     {
@@ -61,25 +64,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // TO DO: switch case with argument in order to select which effect to use
-    // extract channels
-    // PPMEffects result = PPMEffects(argv[3][0]);
-    // image = result.extract(image);
-
-    // negative
-    // image = PPMEffects::negative(image);
-
-    // mirror image
-    // image = PPMEffects::mirror(image, argv[4][0]);
-
-    // rotate image
-    // image = PPMEffects::rotate(image, stoi(argv[4]));
-    // TO DO: fix rotate for |rotation| > 90
-
-    // change light intensity
-    // image = PPMEffects::changeIntensity(image, stof(argv[4]));
-
-    // output image to ppm file
     imwrite(argv[2], outputImage);
 
     // display result
