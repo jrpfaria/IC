@@ -1,0 +1,12 @@
+#!/bin/bash
+for ((count=-25; count<=25; count++))
+do
+    # Execute the bash code with ../bin/golomb and the current value of count
+    output=$(../bin/golomb $count)
+    
+    # Compare the output with the expected value
+    expected_output=$count
+    if [ "$output" != "$expected_output" ]; then
+        echo "Test $count failed: Expected $expected_output but got $output"
+    fi
+done

@@ -62,27 +62,50 @@ class Golomb {
         int decode(vector<bool> bits) {
             int i = 0;
 
-            // Decode the sign bit first.
-            i = bits[0] ? -1 : 1;
+            // Decode the signal of the integer.
+            int s = 0;
+            if (method){
+                s = bits[0] ? -1 : 1;
+                bits.erase(bits.begin());
+            }else 
+                s = bits[bits.size() - 1] ? -1 : 1;
 
-            // Decode the absolute value of x.
-            int q = 0;
-            int r = 0;
+            // Decode the absolute value of the integer.
+            int q = 0, r = 0;
 
             // Decode the quotient from the unary code.
-            int j = 1;
-            while (bits[j]) {
+            while (bits[0]){
                 q++;
-                j++;
+                bits.erase(bits.begin());
             }
+            // Remove the terminating zero.
+            bits.erase(bits.begin());
 
             // Decode the remainder from the binary code.
-            for (int j = 0; j < m; j++)
-                r |= bits[i + j] << (m - j - 1);
+            // Check if truncated binary is used.
+            bool t = log2(m) != ceil(log2(m));
+            long unsigned int b = ceil(log2(m));
             
+            // Check if the remainder was written with b bits.
+            bool n = bits.size() == b;
 
-            i *= q * m + r;
+            // If truncated binary is used
+            // Check if the remainder is greater or equal to 2^b - m.
+            while (!bits.empty()){
+                r = (r << 1) | bits[0];
+                bits.erase(bits.begin());
+            }
 
+            // Correct the remainder if necessary.
+            if (t && n) r = r - (1 << b) + m;
+
+            // Reconstruct the integer.
+            // Currently wrong for m != 2^b && method = variable intervaling
+            if (method)
+                i = s * (q*m + r);
+            else
+                i = s * (((q*m + r) + 1) >> 1);
+            
             return i;
         }
 };

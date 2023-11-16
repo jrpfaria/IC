@@ -14,14 +14,15 @@ int main(int argc, char *argv[]) {
     }
   
   // Create a GolombCoder with the parameter m = 4.
-  Golomb coder(4);
+  Golomb coder(5, 0);
 
   // Encode the integer 15.
   vector<bool> bits = coder.encode(stoi(argv[1]));
 
-  for (int i = 0; i < bits.size(); i++) {
-    cout << bits[i] << " ";
-  }
+  // for (long unsigned int i = 0; i < bits.size(); i++) {
+  //   cout << bits[i] << " ";
+  // }
+
   // Decode the sequence of bits.
   int decoded_x = coder.decode(bits);
 
