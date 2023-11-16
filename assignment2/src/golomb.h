@@ -63,12 +63,11 @@ class Golomb {
             int i = 0;
 
             // Decode the signal of the integer.
-            int s = 0;
+            int s = 1;
             if (method){
                 s = bits[0] ? -1 : 1;
                 bits.erase(bits.begin());
-            }else 
-                s = bits[bits.size() - 1] ? -1 : 1;
+            }
 
             // Decode the absolute value of the integer.
             int q = 0, r = 0;
@@ -100,12 +99,13 @@ class Golomb {
             if (t && n) r = r - (1 << b) + m;
 
             // Reconstruct the integer.
-            // Currently wrong for m != 2^b && method = variable intervaling
-            if (method)
-                i = s * (q*m + r);
-            else
-                i = s * (((q*m + r) + 1) >> 1);
-            
+            i = s * (q*m + r);
+
+            if (!method){
+                s = i % 2;
+                i = s == 1 ? -((i + 1) >> 1) : i >> 1;
+            }                
+
             return i;
         }
 };
