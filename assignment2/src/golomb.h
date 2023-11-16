@@ -25,8 +25,11 @@ class Golomb {
             int q, r, b;
 
             // Encode the sign bit first.
-            bits.push_back(i < 0);
-
+            if (method)
+                bits.push_back(i < 0);
+            else 
+                i = (i < 0) ? abs(i << 1) - 1 : (i << 1);
+            
             // Encode the absolute value of i.
             i = abs(i);
             q = floor(i / m);
@@ -39,21 +42,18 @@ class Golomb {
 
             // Encode the remainder: binary code
             // Check the need to use truncated binary.
-            bool truncated = log2(m) != ceil(log2(m));
+            bool t = log2(m) != ceil(log2(m));
             b = ceil(log2(m));
+            
+            // If truncated binary is used
+            // Check if the remainder is greater or equal to 2^b - m.
+            if (t && r >= (1 << b) - m)
+                r = r + (1 << b++) - m;
 
-            if (truncated)
-                if (r >= (1 << b) - m){
-                    r = r + (1 << b) - m;
-                    for (int j = b - 1; j >= 0; j--)
-                        bits.push_back((r >> j) & 1);
-                }
-                else
-                    for (int j = (b - 1) - 1; j >= 0; j--)
-                        bits.push_back((r >> j) & 1);
-            else
-                for (int j = b - 1; j >= 0; j--)
-                    bits.push_back((r >> j) & 1);
+            // Encode the remainder with the appropriate number of bits.
+            int j = t ? b - 2 : b - 1;
+            for (;j >= 0; j--)
+                bits.push_back((r >> j) & 1);
 
             return bits;
         }
