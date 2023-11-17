@@ -32,10 +32,6 @@ int main(int argc, char *argv[]) {
   // Encode the integer 15.
   vector<bool> bits = coder.encode(stoi(argv[1]));
 
-  // for (long unsigned int i = 0; i < bits.size(); i++) {
-  //   cout << bits[i] << " ";
-  // }
-
   // Decode the sequence of bits.
   int decoded_x = coder.decode(bits);
 
