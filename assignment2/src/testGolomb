@@ -1,12 +1,19 @@
 #!/bin/bash
-for ((count=-25; count<=25; count++))
+
+for ((method=0; method<=1; method++))
+do
+for ((m=5; m<=8; m++))
+do
+for ((count=-1000; count<=1000; count++))
 do
     # Execute the bash code with ../bin/golomb and the current value of count
-    output=$(../bin/golomb $count)
+    output=$(../bin/golomb $count $m $method)
     
     # Compare the output with the expected value
     expected_output=$count
     if [ "$output" != "$expected_output" ]; then
         echo "Test $count failed: Expected $expected_output but got $output"
     fi
+done
+done
 done
