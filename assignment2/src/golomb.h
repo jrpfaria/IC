@@ -42,8 +42,10 @@ class Golomb {
 
             // Encode the remainder: binary code
             // Check the need to use truncated binary.
-            bool t = log2(m) != ceil(log2(m));
-            b = ceil(log2(m));
+            double aux = log2(m);
+            double cb = ceil(aux);
+            bool t = aux != cb;
+            b = (int)cb;
             
             // If truncated binary is used
             // Check if the remainder is greater or equal to 2^b - m.
@@ -61,38 +63,35 @@ class Golomb {
         // Decodes a sequence of bits into an integer.
         int decode(vector<bool> bits) {
             int i = 0;
+            long unsigned int iter = 0;
 
             // Decode the signal of the integer.
             int s = 1;
             if (method){
                 s = bits[0] ? -1 : 1;
-                bits.erase(bits.begin());
+                iter++;
             }
 
             // Decode the absolute value of the integer.
             int q = 0, r = 0;
-
+            
             // Decode the quotient from the unary code.
-            while (bits[0]){
-                q++;
-                bits.erase(bits.begin());
-            }
-            // Remove the terminating zero.
-            bits.erase(bits.begin());
+            while (bits[iter++]) q++;
 
             // Decode the remainder from the binary code.
             // Check if truncated binary is used.
-            bool t = log2(m) != ceil(log2(m));
-            long unsigned int b = ceil(log2(m));
+            double aux = log2(m);
+            double cb = ceil(aux);
+            bool t = aux != cb;
+            long unsigned int b = (long unsigned int)cb;
             
             // Check if the remainder was written with b bits.
-            bool n = bits.size() == b;
+            bool n = bits.size() - iter == b;
 
             // If truncated binary is used
             // Check if the remainder is greater or equal to 2^b - m.
-            while (!bits.empty()){
-                r = (r << 1) | bits[0];
-                bits.erase(bits.begin());
+            while (iter < bits.size()){
+                r = (r << 1) | bits[iter++];
             }
 
             // Correct the remainder if necessary.
