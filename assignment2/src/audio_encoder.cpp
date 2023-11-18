@@ -66,14 +66,7 @@ int main(int argc, char *argv[]) {
 		predG.push_back(g.encode(p));
 	}
 
-    fstream fileOutput;
-    try {
-        fileOutput = fstream(argv[argc-1], std::fstream::out | std::fstream::binary);
-    }
-    catch (const exception &) {
-        fclose(fopen(argv[argc-1], "a"));
-    }
-    BitStream bitstreamOutput { &fileOutput };
+    BitStream bitstreamOutput { argv[argc-1], 0 };
 
     for (int i = 0; i < 16; i++) {
         bitstreamOutput.write((m>>(15-i))&1);

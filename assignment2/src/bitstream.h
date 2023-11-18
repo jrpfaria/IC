@@ -10,59 +10,56 @@ using namespace std;
 
 class BitStream {
     private: 
-        fstream* f;
-        unsigned char buffer = 0;
+        fstream f;
+        bool mode;
+        unsigned char buffer;
         int free = 8;
     
     public:
-        BitStream(fstream* f) {
-            this->f = f;
+        BitStream(char* file, bool mode) {
+            this->mode = mode;
+            if (mode) {
+                this->f = fstream(file, std::fstream::in | std::fstream::binary);
+            }
+            else {
+                fclose(fopen(file, "a"));
+                this->f = fstream(file, std::fstream::out | std::fstream::binary);
+            }
         }
 
         int size() {
-            int size = (*f).tellg();
-            (*f).seekg(0, std::ios::end);
-            size = int((*f).tellg())-size;
-            (*f).clear();
-            (*f).seekg(0);
+            int size = f.tellg();
+            f.seekg(0, std::ios::end);
+            size = int(f.tellg())-size;
+            f.clear();
+            f.seekg(0);
             return size;
         }
 
+        unsigned char read() {
+            if (free==8) {
+                char c = 0;
+                f.read(&c, 1);
+                buffer = c;
+                free = 0;
+            }
+            unsigned char bit = (buffer>>(7-free))&1;
+            free++;
+            return bit;
+        }
+
         vector<unsigned char> read(int n) {
-            assert (n>=0&&n<=64);
-            vector<unsigned char> result;
-            result.resize(n);
-            int bytes = floor(n/8);
-            int remaining = n%8;
-            unsigned char bits;
-            unsigned char b;
-            int s;
-            int i;
-            for (i = 0; i < bytes; i++) {
-                bits = (*f).get();
-                s = 8;
-                for (int j = 0; j < 8; j++) {
-                    s--;
-                    b = (bits>>s)&1;
-                    result[(i*8)+j] = b;
-                }
+            vector<unsigned char> bits(n);
+            for (int i = 0; i < n; i++) {
+                bits[i] = read();
             }
-            if (remaining>0) {
-                bits = (*f).get();
-                s = 8;
-                for (int j = 0; j < remaining; j++) {
-                    s--;
-                    b = (bits>>s)&1;
-                    result[(i*8)+j] = b;
-                }
-            }
-            return result;
+            return bits;
         }
 
         string readString(int n) {
             string result = "";
             for (int i = 0; i < n; i++) {
-                result += (*f).get();
+                result += f.get();
             }
             return result;
         }
@@ -73,7 +70,7 @@ class BitStream {
             free--;
             if (free==0) {
                 char c = buffer;
-                (*f).write(&c, 1);
+                f.write(&c, 1);
                 free = 8;
             }
         }
@@ -82,6 +79,12 @@ class BitStream {
             int n = bits.size();
             for (int i = 0; i < n; i++) {
                 write(bits[i]);
+            }
+        }
+
+        void write(int value, int n) {
+            for (int i = 0; i < n; i++) {
+                write((value>>(n-i-1))&1);
             }
         }
 
@@ -97,8 +100,8 @@ class BitStream {
         }
 
         void close() {
-            while (free!=8) write(0);
-            (*f).close();
+            if (mode) while (free!=8) write(0);
+            f.close();
         }
     };
 

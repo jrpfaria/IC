@@ -14,15 +14,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	fstream fileInput;
-    try {
-        fileInput = fstream(argv[argc-2], std::fstream::in | std::fstream::binary);
-    }
-    catch (const exception &) {
-        cerr << "Error: invalid input file\n";
-		return 1;
-    }
-    BitStream bitstreamInput { &fileInput };
+	BitStream bitstreamInput = BitStream(argv[argc-2], 1);
 
 	vector<unsigned char> bits;
 	int size = bitstreamInput.size()*8;
@@ -61,7 +53,8 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < 16; i++) {
 		samplerate += bits[cursor++]<<(15-i);
 	}
-
+	cout << nChannels << endl;
+	cout << samplerate << endl;
 	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16,
 	  int(nChannels), samplerate };
 	if(sfhOut.error()) {
