@@ -15,48 +15,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	BitStream bitstreamInput = BitStream(argv[argc-2], 1);
-
-	vector<unsigned char> bits;
-	int size = bitstreamInput.size()*8;
-    int chunks = size/64;
-    for (int i = 0; i < chunks; i++) {
-        std::vector<unsigned char> read = bitstreamInput.read(64);
-		for (int i = 0; i < 64; i++) {
-			bits.push_back(read[i]);
-		}
-	}
-    int rem = size%64;
-    if (rem>0) {
-        std::vector<unsigned char> read = bitstreamInput.read(rem);
-		for (int i = 0; i < rem; i++) {
-			bits.push_back(read[i]);
-		}
-    }
+	int m = bitstreamInput.readInt(16);
+	size_t nChannels = bitstreamInput.readInt(16);
+	size_t nFrames = bitstreamInput.readInt(32);
+	int samplerate = bitstreamInput.readInt(16);
 	
-	int cursor = 0;
-	size_t m = 0;
-	for (int i = 0; i < 16; i++) {
-		m += bits[cursor++]<<(15-i);
-	}
-
-	size_t nChannels = 0;
-	for (int i = 0; i < 16; i++) {
-		nChannels += bits[cursor++]<<(15-i);
-	}
-
-	size_t nFrames = 0;
-	for (int i = 0; i < 32; i++) {
-		nFrames += bits[cursor++]<<(31-i);
-	}
-
-	int samplerate = 0;
-	for (int i = 0; i < 16; i++) {
-		samplerate += bits[cursor++]<<(15-i);
-	}
-	cout << nChannels << endl;
-	cout << samplerate << endl;
-	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16,
-	  int(nChannels), samplerate };
+	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, int(nChannels), samplerate };
 	if(sfhOut.error()) {
 		cerr << "Error: invalid output file\n";
 		return 1;
@@ -68,16 +32,19 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < int(nChannels * nFrames); i++) {
 		vector<bool> value;
 		while (true) {
-			value.push_back(bits[cursor++]);
-			if (!bits[cursor-1]) {
+			unsigned char bit = bitstreamInput.read();
+			value.push_back(bit);
+			if (!bit) {
 				int r = 0;
 				for (int j = 1; j < b; j++) {
-					r = (r << 1) | bits[cursor];
-					value.push_back(bits[cursor++]);
+					bit = bitstreamInput.read();
+					r = (r << 1) | bit;
+					value.push_back(bit);
 				}
 				if (r>=u) {
-					r = (r << 1) | bits[cursor];
-					value.push_back(bits[cursor++]);
+					bit = bitstreamInput.read();
+					r = (r << 1) | bit;
+					value.push_back(bit);
 				}
 				predG.push_back(value);
 				break;

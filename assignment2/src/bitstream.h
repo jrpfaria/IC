@@ -26,16 +26,7 @@ class BitStream {
                 this->f = fstream(file, std::fstream::out | std::fstream::binary);
             }
         }
-
-        int size() {
-            int size = f.tellg();
-            f.seekg(0, std::ios::end);
-            size = int(f.tellg())-size;
-            f.clear();
-            f.seekg(0);
-            return size;
-        }
-
+        
         unsigned char read() {
             if (free==8) {
                 char c = 0;
@@ -54,6 +45,14 @@ class BitStream {
                 bits[i] = read();
             }
             return bits;
+        }
+
+        int readInt(int n) {
+            int result = 0;
+            for (int i = 0; i < n; i++) {
+                result = (result<<1)|read();
+            }
+            return result;
         }
 
         string readString(int n) {
@@ -90,12 +89,8 @@ class BitStream {
 
         void write(string s) {
             int l = s.length();
-            unsigned char bit;
             for (int i = 0; i < l; i++) {
-                for (int j = 0; j < 8; j++) {
-                    bit = (s[i]>>(7-j))&1;
-                    write(bit);
-                }
+                write(s[i],8);
             }
         }
 

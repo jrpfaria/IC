@@ -48,13 +48,10 @@ int main(int argc, char *argv[]) {
 	size_t nChannels { static_cast<size_t>(sfhIn.channels()) };
 	size_t nFrames { static_cast<size_t>(sfhIn.frames()) };
 
-	// Read all samples: c1 c2 ... cn c1 c2 ... cn ...
-	// Note: A frame is a group c1 c2 ... cn
 	vector<short> samples(nChannels * nFrames);
 	sfhIn.readf(samples.data(), nFrames);
 
 	Golomb g = Golomb(m, 0);
-	// Vector for holding all predictions
 	vector<int> pred;
 	pred.push_back(samples[0]);
 	for (int i = 1; i < int(nChannels * nFrames); i++) {
@@ -67,23 +64,10 @@ int main(int argc, char *argv[]) {
 	}
 
     BitStream bitstreamOutput { argv[argc-1], 0 };
-
-    for (int i = 0; i < 16; i++) {
-        bitstreamOutput.write((m>>(15-i))&1);
-    }
-
-    for (int i = 0; i < 16; i++) {
-        bitstreamOutput.write((nChannels>>(15-i))&1);
-    }
-
-    for (int i = 0; i < 32; i++) {
-        bitstreamOutput.write((nFrames>>(31-i))&1);
-    }
-
-    int samplerate = sfhIn.samplerate();
-    for (int i = 0; i < 16; i++) {
-        bitstreamOutput.write((samplerate>>(15-i))&1);
-    }
+	bitstreamOutput.write(m,16);
+	bitstreamOutput.write(nChannels,16);
+	bitstreamOutput.write(nFrames,32);
+	bitstreamOutput.write(sfhIn.samplerate(),16);
 
     for (int i = 0; i < int(nChannels * nFrames); i++) {
 		for (bool bit: predG[i]) {
