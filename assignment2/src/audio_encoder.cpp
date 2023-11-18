@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <cmath>
 #include <sndfile.hh>
 #include "bitstream.h"
 #include "golomb.h"
@@ -56,10 +55,15 @@ int main(int argc, char *argv[]) {
 
 	Golomb g = Golomb(m, 0);
 	// Vector for holding all predictions
-	vector<vector<bool>> pred;
-	pred.push_back(g.encode(samples[0]));
-	for (int i = 0; i < int(nChannels * nFrames); i++) {
-		pred.push_back(g.encode(samples[i]-samples[i-1]));
+	vector<int> pred;
+	pred.push_back(samples[0]);
+	for (int i = 1; i < int(nChannels * nFrames); i++) {
+		pred.push_back(samples[i]-samples[i-1]);
+	}
+
+	vector<vector<bool>> predG;
+	for (auto p: pred) {
+		predG.push_back(g.encode(p));
 	}
 
     fstream fileOutput;
@@ -89,7 +93,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 0; i < int(nChannels * nFrames); i++) {
-		for (bool bit: pred[i]) {
+		for (bool bit: predG[i]) {
 			bitstreamOutput.write(char(bit));
 		}
 	}
@@ -97,4 +101,3 @@ int main(int argc, char *argv[]) {
     bitstreamOutput.close();
 	return 0;
 }
-

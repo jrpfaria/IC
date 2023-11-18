@@ -22,3 +22,6 @@ target_link_libraries (golomb)
 
 add_executable (audio_encoder audio_encoder.cpp)
 target_link_libraries (audio_encoder sndfile)
+
+add_executable (audio_decoder audio_decoder.cpp)
+target_link_libraries (audio_decoder sndfile)
