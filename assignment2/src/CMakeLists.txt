@@ -17,8 +17,8 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 add_executable (ppm_effects ppm_effects.cpp)
 target_link_libraries (ppm_effects ${OpenCV_LIBS})
 
-add_executable (golomb golomb.cpp)
-target_link_libraries (golomb)
+#add_executable (golomb golomb.cpp)
+#target_link_libraries (golomb)
 
 add_executable (audio_encoder audio_encoder.cpp)
 target_link_libraries (audio_encoder sndfile)

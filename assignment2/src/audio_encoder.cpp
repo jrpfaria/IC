@@ -51,28 +51,21 @@ int main(int argc, char *argv[]) {
 	vector<short> samples(nChannels * nFrames);
 	sfhIn.readf(samples.data(), nFrames);
 
-	Golomb g = Golomb(m, 0);
 	vector<int> pred;
 	pred.push_back(samples[0]);
 	for (int i = 1; i < int(nChannels * nFrames); i++) {
 		pred.push_back(samples[i]-samples[i-1]);
 	}
 
-	vector<vector<bool>> predG;
-	for (auto p: pred) {
-		predG.push_back(g.encode(p));
-	}
-
-    BitStream bitstreamOutput { argv[argc-1], 0 };
+	BitStream bitstreamOutput { argv[argc-1], 0 };
 	bitstreamOutput.write(m,16);
 	bitstreamOutput.write(nChannels,16);
 	bitstreamOutput.write(nFrames,32);
 	bitstreamOutput.write(sfhIn.samplerate(),16);
 
-    for (int i = 0; i < int(nChannels * nFrames); i++) {
-		for (bool bit: predG[i]) {
-			bitstreamOutput.write(char(bit));
-		}
+	Golomb g = Golomb(bitstreamOutput, m, 0);
+	for (auto p: pred) {
+		g.encode(p);
 	}
 
     bitstreamOutput.close();

@@ -26,37 +26,16 @@ int main(int argc, char *argv[]) {
 		return 1;
     }
 
-	vector<vector<bool>> predG;
-	int b = ceil(log2(m));
-	int u = (1 << b) - m;
+	vector<int> pred;
+	Golomb g = Golomb(bitstreamInput, m, 0);
 	for (int i = 0; i < int(nChannels * nFrames); i++) {
-		vector<bool> value;
-		while (true) {
-			unsigned char bit = bitstreamInput.read();
-			value.push_back(bit);
-			if (!bit) {
-				int r = 0;
-				for (int j = 1; j < b; j++) {
-					bit = bitstreamInput.read();
-					r = (r << 1) | bit;
-					value.push_back(bit);
-				}
-				if (r>=u) {
-					bit = bitstreamInput.read();
-					r = (r << 1) | bit;
-					value.push_back(bit);
-				}
-				predG.push_back(value);
-				break;
-			}
-		}
+		pred.push_back(g.decode());
 	}
 
-	Golomb g = Golomb(m, 0);
 	vector<short> samples(nChannels * nFrames);
-	samples[0] = g.decode(predG[0]);
+	samples[0] = pred[0];
 	for (int i = 1; i < int(nChannels * nFrames); i++) {
-		samples[i] = samples[i-1] + g.decode(predG[i]);
+		samples[i] = samples[i-1] + pred[i];
 	}
 
 	sfhOut.writef(samples.data(), nFrames);

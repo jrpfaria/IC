@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include "bitstream.h"
 #include <opencv2/opencv.hpp>
 
 using namespace std;
@@ -11,23 +12,25 @@ using namespace cv;
 
 class Golomb {
     private:
+        BitStream &bs;
         int m;
         bool method = 1; // sign and magnitude; false = two's complement
 
     public:
-        Golomb(int m, bool method){
+        Golomb(BitStream& _bs, int m, bool method):
+        bs(_bs)
+        {
             this->m = m;
             this->method = method;
         }
 
-        vector<bool> encode(int i) {
-            vector<bool> bits;
-            int q, r, b;
+        void encode(int i) {
+            int q, r;
 
             // Encode the sign bit first.
             if (method)
-                bits.push_back(i < 0);
-            else 
+                bs.write(i < 0);
+            else
                 i = (i < 0) ? abs(i << 1) - 1 : (i << 1);
             
             // Encode the absolute value of i.
@@ -37,65 +40,44 @@ class Golomb {
 
             // Encode the quotient: unary code.
             for (int j = 0; j < q; j++)
-                bits.push_back(1);
-            bits.push_back(0);
+                bs.write(1);
+            bs.write(0);
 
             // Encode the remainder: binary code
             // Check the need to use truncated binary.
-            double aux = log2(m);
-            double cb = ceil(aux);
-            bool t = aux != cb;
-            b = (int)cb;
+            int b = ceil(log2(m));
+            int u = (1 << b) - m;
             
             // If truncated binary is used
             // Check if the remainder is greater or equal to 2^b - m.
-            if (t && r >= (1 << b) - m)
-                r = r + (1 << b++) - m;
-
-            // Encode the remainder with the appropriate number of bits.
-            int j = t ? b - 2 : b - 1;
-            for (;j >= 0; j--)
-                bits.push_back((r >> j) & 1);
-
-            return bits;
+            (r < u) ? bs.write(r, b-1) : bs.write(r+u, b);
         }
 
         // Decodes a sequence of bits into an integer.
-        int decode(vector<bool> bits) {
+        int decode() {
             int i = 0;
-            long unsigned int iter = 0;
 
             // Decode the signal of the integer.
             int s = 1;
             if (method){
-                s = bits[0] ? -1 : 1;
-                iter++;
+                s = bs.read() ? -1 : 1;
             }
 
             // Decode the absolute value of the integer.
             int q = 0, r = 0;
             
             // Decode the quotient from the unary code.
-            while (bits[iter++]) q++;
+            while (bs.read()) q++;
 
             // Decode the remainder from the binary code.
             // Check if truncated binary is used.
-            double aux = log2(m);
-            double cb = ceil(aux);
-            bool t = aux != cb;
-            long unsigned int b = (long unsigned int)cb;
+            int b = ceil(log2(m));
+            int u = (1 << b) - m;
             
-            // Check if the remainder was written with b bits.
-            bool n = bits.size() - iter == b;
-
-            // If truncated binary is used
-            // Check if the remainder is greater or equal to 2^b - m.
-            while (iter < bits.size()){
-                r = (r << 1) | bits[iter++];
-            }
-
-            // Correct the remainder if necessary.
-            if (t && n) r = r - (1 << b) + m;
+            for (int j = 0; j < b-1; j++)
+                r = (r << 1) | bs.read();
+            if (r>=u)
+                r = ((r << 1) | bs.read()) - u;
 
             // Reconstruct the integer.
             i = s * (q*m + r);
@@ -103,7 +85,7 @@ class Golomb {
             if (!method){
                 s = i % 2;
                 i = s == 1 ? -((i + 1) >> 1) : i >> 1;
-            }                
+            }
 
             return i;
         }
