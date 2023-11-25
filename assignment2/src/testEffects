@@ -1,0 +1,62 @@
+#!/bin/bash
+
+extract_options=(b g r)
+mirror_options=(h v)
+rotate_options=(90 180 270)
+light_options=(0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0)
+file_names=(airplane anemone arial baboon bike3 boat girl house lena monarch peppers tulips)
+
+mkdir ../result_images
+
+effect="extract"
+mkdir ../result_images/$effect
+for extra in ${extract_options[@]}
+do
+    mkdir ../result_images/$effect/$extra
+    for file in ${file_names[@]}
+    do
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+    done
+done
+
+effect="negative"
+mkdir ../result_images/$effect
+for file in ${file_names[@]}
+    do
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect 0
+    done
+
+effect="mirror"
+mkdir ../result_images/$effect
+for extra in ${mirror_options[@]}
+do
+    mkdir ../result_images/$effect/$extra
+    for file in ${file_names[@]}
+    do
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+    done
+done
+
+effect="rotate"
+mkdir ../result_images/$effect
+for extra in ${rotate_options[@]}
+do
+    mkdir ../result_images/$effect/$extra
+    for file in ${file_names[@]}
+    do
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+    done
+done
+
+effect="light"
+mkdir ../result_images/$effect
+for extra in ${light_options[@]}
+do
+    mkdir ../result_images/$effect/$(echo "$extra*100" | bc)
+    for file in ${file_names[@]}
+    do
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$(echo "$extra*100" | bc)/$file.ppm $effect $extra
+    done
+done
+
+echo "All done"

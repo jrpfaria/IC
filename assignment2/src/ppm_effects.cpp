@@ -73,12 +73,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    imwrite(outputFileName, outputImage);
-
-    // display result
-    namedWindow("Display window", WINDOW_AUTOSIZE);
-    imshow("Display window", outputImage);
-    waitKey(0);
+    if (effect == "extract")
+        cvtColor(outputImage, outputImage, COLOR_GRAY2BGR);
+    else 
+        imwrite(outputFileName, outputImage);
 
     return 0;
 }
