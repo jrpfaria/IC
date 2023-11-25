@@ -56,6 +56,10 @@ int main(int argc, char *argv[]) {
 
     else if (effect == "light")
     { 
+        if (argv[5][0] > '2' || argv[5][0] < 0) {
+            cerr << "Invalid operation! Light value should be in the [0; 2] interval" << endl;
+            return 1;
+        }
         outputImage = changeIntensity(inputImage,stod(argv[5]));
     }
     else
