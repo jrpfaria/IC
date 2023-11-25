@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <cmath>
+
 #include <opencv2/opencv.hpp>
 
 using namespace std;
@@ -113,13 +114,23 @@ namespace ppmeffects {
         return result;
     }
 
+    static int adaptIntensity(int value, float intensity) {
+        int result = 0;
+        // This formula adds a percentage of the complementary of the value to the original value
+        // This way we have a progression of the intensity that resembles a logarithmic curve
+        if (intensity > 1) result = (intensity - 1) * (255 - value) + value;
+        else result = value - (1 - intensity) * value;
+        result = std::max(0, std::min(result, 255)); // clamp result to 0-255
+        return result;
+    }
+
     static Mat changeIntensity(Mat image, float intensity) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
         for (int i = 0; i < image.rows; i++)
             for (int j = 0; j < image.cols; j++){
-                result.at<Vec3b>(i,j)[0] = image.at<Vec3b>(i,j)[0] * intensity;
-                result.at<Vec3b>(i,j)[1] = image.at<Vec3b>(i,j)[1] * intensity;
-                result.at<Vec3b>(i,j)[2] = image.at<Vec3b>(i,j)[2] * intensity;
+                result.at<Vec3b>(i,j)[0] = adaptIntensity(image.at<Vec3b>(i,j)[0], intensity);
+                result.at<Vec3b>(i,j)[1] = adaptIntensity(image.at<Vec3b>(i,j)[1], intensity);
+                result.at<Vec3b>(i,j)[2] = adaptIntensity(image.at<Vec3b>(i,j)[2], intensity);
             }
         return result;
     }

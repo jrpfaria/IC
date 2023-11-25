@@ -10,7 +10,7 @@ using namespace ppmeffects;
 int main(int argc, char *argv[]) {
     // check number of args
     if (argc < 5) {
-        cerr << "Usage: " << argv[0] << " <input file> <output file> <channels> <effect> <extra>" << endl;
+        cerr << "Usage: " << argv[0] << " <input file> <output file> <effect> <extra>" << endl;
         return 1;
     }
 
@@ -21,32 +21,36 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-    string effect = argv[4];
+    string effect = argv[3];
+    string extra = argv[4];
+    string outputFileName = argv[2];
 
     Mat outputImage(inputImage.size(), CV_8UC3);
 
     if (effect == "extract")
     {
-        if (argv[3][0] != 'b' && argv[3][0] != 'g' && argv[3][0] != 'r') {
+        char channel = extra[0];
+        if (channel != 'b' && channel != 'g' && channel != 'r') {
             cerr << "Invalid channel! Available: b, g and r" << endl;
             return 1;
         }
-        outputImage = extract(inputImage, argv[3][0]);
+        outputImage = extract(inputImage, channel);
     }
 
-    else if (effect == "negate")
+    else if (effect == "negative")
     {
         outputImage = negative(inputImage);
     }
 
     else if (effect == "mirror")
     {
-        outputImage = mirror(inputImage, argv[5][0]);
+        char axis = extra[0];
+        outputImage = mirror(inputImage, axis);
     }
 
     else if (effect == "rotate")
     {
-        int angle = stoi(argv[5]);
+        int angle = stoi(extra);
         if (angle % 90 != 0) {
             cerr << "Degrees to rotate must be a multiple of 90" << endl;
             return 1;
@@ -56,7 +60,12 @@ int main(int argc, char *argv[]) {
 
     else if (effect == "light")
     { 
-        outputImage = changeIntensity(inputImage,stod(argv[5]));
+        float intensity = stod(extra);
+        if (intensity > '2' || intensity < 0) {
+            cerr << "Invalid operation! Light value should be in the [0; 2] interval" << endl;
+            return 1;
+        }
+        outputImage = changeIntensity(inputImage,intensity);
     }
     else
     {
@@ -64,12 +73,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    imwrite(argv[2], outputImage);
-
-    // display result
-    namedWindow("Display window", WINDOW_AUTOSIZE);
-    imshow("Display window", outputImage);
-    waitKey(0);
+    if (effect == "extract")
+        cvtColor(outputImage, outputImage, COLOR_GRAY2BGR);
+    else 
+        imwrite(outputFileName, outputImage);
 
     return 0;
 }
