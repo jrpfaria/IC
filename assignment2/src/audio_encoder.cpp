@@ -7,7 +7,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	int m = 5000;
 	bool verbose { false };
 
 	if(argc < 3) {
@@ -57,8 +56,10 @@ int main(int argc, char *argv[]) {
 		pred.push_back(samples[i]-samples[i-1]);
 	}
 
+	int m = Golomb::idealM(pred);
+
 	BitStream bitstreamOutput { argv[argc-1], 0 };
-	bitstreamOutput.write(m,16);
+	bitstreamOutput.write(m, 16);
 	bitstreamOutput.write(nChannels,16);
 	bitstreamOutput.write(nFrames,32);
 	bitstreamOutput.write(sfhIn.samplerate(),16);

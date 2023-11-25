@@ -24,6 +24,19 @@ class Golomb {
             this->method = method;
         }
 
+        static int idealM(vector<int> values) {
+            double e = 0;
+            for (auto i: values) {
+                int j = (i < 0) ? abs(i << 1) - 1 : (i << 1);
+                e += abs(j);
+            }
+            e /= values.size();
+            double p = 1;
+            p /= e;
+            int m = ceil(-log(2-p)/log(1-p));
+            return m;
+        }
+        
         void encode(int i) {
             int q, r;
 
