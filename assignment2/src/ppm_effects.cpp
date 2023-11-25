@@ -75,8 +75,7 @@ int main(int argc, char *argv[]) {
     
     if (effect == "extract")
         cvtColor(outputImage, outputImage, COLOR_GRAY2BGR);
-    else 
-        imwrite(outputFileName, outputImage);
+    imwrite(outputFileName, outputImage);
 
     return 0;
 }
