@@ -9,7 +9,7 @@ using namespace ppmeffects;
 
 int main(int argc, char *argv[]) {
     // check number of args
-    if (argc < 5) {
+    if (argc < 4) {
         cerr << "Usage: " << argv[0] << " <input file> <output file> <effect> <extra>" << endl;
         return 1;
     }
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         }
 
     string effect = argv[3];
-    string extra = argv[4];
+    string extra = (argc > 4) ? argv[4] : "";
     string outputFileName = argv[2];
 
     Mat outputImage(inputImage.size(), CV_8UC3);
@@ -45,6 +45,10 @@ int main(int argc, char *argv[]) {
     else if (effect == "mirror")
     {
         char axis = extra[0];
+        if (axis != 'v' && axis != 'h'){
+            cerr << "Invalid axis! Available: v(vertically) or h(horizontally)" << endl;
+            return 1;
+        }
         outputImage = mirror(inputImage, axis);
     }
 
@@ -69,7 +73,7 @@ int main(int argc, char *argv[]) {
     }
     else
     {
-        cerr << "Invalid effect! Available: extract, negate, mirror, rotate and light" << endl;
+        cerr << "Invalid effect! Available: extract, negative, mirror, rotate and light" << endl;
         return 1;
     }
     
