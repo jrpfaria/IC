@@ -63,7 +63,6 @@ namespace ppmeffects {
         int height = image.rows;
 
         angle = (angle % 360) >= 0 ? (angle % 360) : (angle % 360) + 360;
-        
 
         if ((angle == 90) || (angle == 270)) result = Mat::zeros(width, height, CV_8UC3);
         else if (angle == 180) result = Mat::zeros(height, width, CV_8UC3);
