@@ -1,9 +1,10 @@
 #!/bin/bash
 
+LC_NUMERIC=C
 extract_options=(b g r)
 mirror_options=(h v)
-rotate_options=(90 180 270)
-light_options=(0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0)
+rotate_options=(-270 -180 -90 90 180 270)
+light_options=(0 0.125 0.25 0.375 0.5 0.625 0.75 0.875 1.0 1.125 1.25 1.375 1.5 1.625 1.75 1.875 2.0)
 file_names=(airplane anemone arial baboon bike3 boat girl house lena monarch peppers tulips)
 
 mkdir -p ../result_images
@@ -15,7 +16,7 @@ do
     mkdir -p ../result_images/$effect/$extra
     for file in ${file_names[@]}
     do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.png $effect $extra
     done
 done
 
@@ -23,7 +24,7 @@ effect="negative"
 mkdir -p ../result_images/$effect
 for file in ${file_names[@]}
     do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect 0
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.png $effect 0
     done
 
 effect="mirror"
@@ -33,7 +34,7 @@ do
     mkdir -p ../result_images/$effect/$extra
     for file in ${file_names[@]}
     do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.png $effect $extra
     done
 done
 
@@ -44,7 +45,7 @@ do
     mkdir -p ../result_images/$effect/$extra
     for file in ${file_names[@]}
     do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.ppm $effect $extra
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.png $effect $extra
     done
 done
 
@@ -52,10 +53,10 @@ effect="light"
 mkdir -p ../result_images/$effect
 for extra in ${light_options[@]}
 do
-    mkdir -p ../result_images/$effect/$(echo "$extra*100" | bc)
+    mkdir -p ../result_images/$effect/$(printf "%.1f" $(echo "$extra*100" | bc) | tr '.' '_')
     for file in ${file_names[@]}
     do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$(echo "$extra*100" | bc)/$file.ppm $effect $extra
+        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$(printf "%.1f" $(echo "$extra*100" | bc) | tr '.' '_')/$file.png $effect $extra
     done
 done
 
