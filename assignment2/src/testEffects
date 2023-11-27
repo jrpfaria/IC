@@ -23,9 +23,9 @@ done
 effect="negative"
 mkdir -p ../result_images/$effect
 for file in ${file_names[@]}
-    do
-        ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$extra/$file.png $effect 0
-    done
+do
+    ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$file.png $effect
+done
 
 effect="mirror"
 mkdir -p ../result_images/$effect
