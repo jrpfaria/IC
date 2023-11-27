@@ -15,17 +15,10 @@ namespace ppmeffects {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC1);
         int ch = 0;
         switch(color){
-            case 'b':
-                ch = 0;
-                break;
-            case 'g':
-                ch = 1;
-                break;
-            case 'r':
-                ch = 2;
-                break;
-            default:
-                break;
+            case 'b': ch = 0; break;
+            case 'g': ch = 1; break;
+            case 'r': ch = 2; break;
+            default: break;
         }
         for (int i = 0; i < image.rows; i++) 
             for (int j = 0; j < image.cols; j++) 
@@ -36,33 +29,27 @@ namespace ppmeffects {
     static Mat negative(Mat image) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
         for (int i = 0; i < image.rows; i++)
-            for (int j = 0; j < image.cols; j++){
-                result.at<Vec3b>(i,j)[0] = 0xFF - image.at<Vec3b>(i,j)[0];
-                result.at<Vec3b>(i,j)[1] = 0xFF - image.at<Vec3b>(i,j)[1];
-                result.at<Vec3b>(i,j)[2] = 0xFF - image.at<Vec3b>(i,j)[2];
-            }
+            for (int j = 0; j < image.cols; j++)
+                for (int k = 0; k < 3; k++)
+                    result.at<Vec3b>(i,j)[k] = 0xFF - image.at<Vec3b>(i,j)[k];
         return result;
     }
 
     static Mat mirrorHorizontally(Mat image) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
         for (int i = 0; i < image.rows; i++)
-            for (int j = 0; j < image.cols; j++){
-                result.at<Vec3b>(i,j)[0] = image.at<Vec3b>(i,image.cols - j)[0];
-                result.at<Vec3b>(i,j)[1] = image.at<Vec3b>(i,image.cols - j)[1];
-                result.at<Vec3b>(i,j)[2] = image.at<Vec3b>(i,image.cols - j)[2];
-            }
+            for (int j = 0; j < image.cols; j++)
+                for (int k = 0; k < 3; k++)
+                    result.at<Vec3b>(i,j)[k] = image.at<Vec3b>(i,image.cols - j)[k];
         return result;
     }
 
     static Mat mirrorVertically(Mat image) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
         for (int i = 0; i < image.rows; i++)
-            for (int j = 0; j < image.cols; j++){
-                result.at<Vec3b>(i,j)[0] = image.at<Vec3b>(image.rows - i,j)[0];
-                result.at<Vec3b>(i,j)[1] = image.at<Vec3b>(image.rows - i,j)[1];
-                result.at<Vec3b>(i,j)[2] = image.at<Vec3b>(image.rows - i,j)[2];
-            }
+            for (int j = 0; j < image.cols; j++)
+                for (int k = 0; k < 3; k++)
+                    result.at<Vec3b>(i,j)[k] = image.at<Vec3b>(image.rows - i,j)[k];
         return result;
     }
 
@@ -85,27 +72,21 @@ namespace ppmeffects {
         switch (angle % 360){
             case 90:
                 for (int i = 0; i < height; i++) 
-                    for (int j = 0; j < width; j++){
-                        result.at<Vec3b>(width - 1 - j, i)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(width - 1 - j, i)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(width - 1 - j, i)[2] = image.at<Vec3b>(i, j)[2];
-                    }
+                    for (int j = 0; j < width; j++)
+                        for (int k = 0; k < 3; k++)
+                            result.at<Vec3b>(j, height - 1 - i)[k] = image.at<Vec3b>(i, j)[k];
                 break;
             case 180:
                 for (int i = 0; i < height; i++) 
-                    for (int j = 0; j < width; j++){
-                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(height - 1 - i, width - 1 - j)[2] = image.at<Vec3b>(i, j)[2];
-                    }
+                    for (int j = 0; j < width; j++)
+                        for (int k = 0; k < 3; k++)
+                            result.at<Vec3b>(height - 1 - i, width - 1 - j)[k] = image.at<Vec3b>(i, j)[k];
                 break;
             case 270:
                 for (int i = 0; i < height; i++) 
-                    for (int j = 0; j < width; j++){
-                        result.at<Vec3b>(j, height - 1 - i)[0] = image.at<Vec3b>(i, j)[0];
-                        result.at<Vec3b>(j, height - 1 - i)[1] = image.at<Vec3b>(i, j)[1];
-                        result.at<Vec3b>(j, height - 1 - i)[2] = image.at<Vec3b>(i, j)[2];
-                    }
+                    for (int j = 0; j < width; j++)
+                        for (int k = 0; k < 3; k++)
+                            result.at<Vec3b>(width - 1 - j, i)[k] = image.at<Vec3b>(i, j)[k];
                 break;
             default:
                 break;
@@ -119,6 +100,8 @@ namespace ppmeffects {
         // This formula adds a percentage of the complementary of the value to the original value
         // This way we have a progression of the intensity that resembles a logarithmic curve
         if (intensity > 1) result = (intensity - 1) * (255 - value) + value;
+        // If we want to decrease the intensity, we subtract a percentage of the value to the original value
+        // Effectively achieving an inverse logarithmic curve
         else result = value - (1 - intensity) * value;
         result = std::max(0, std::min(result, 255)); // clamp result to 0-255
         return result;
@@ -127,11 +110,9 @@ namespace ppmeffects {
     static Mat changeIntensity(Mat image, float intensity) {
         Mat result = Mat::zeros(image.rows, image.cols, CV_8UC3);
         for (int i = 0; i < image.rows; i++)
-            for (int j = 0; j < image.cols; j++){
-                result.at<Vec3b>(i,j)[0] = adaptIntensity(image.at<Vec3b>(i,j)[0], intensity);
-                result.at<Vec3b>(i,j)[1] = adaptIntensity(image.at<Vec3b>(i,j)[1], intensity);
-                result.at<Vec3b>(i,j)[2] = adaptIntensity(image.at<Vec3b>(i,j)[2], intensity);
-            }
+            for (int j = 0; j < image.cols; j++)
+                for (int k = 0; k < 3; k++)
+                    result.at<Vec3b>(i,j)[k] = adaptIntensity(image.at<Vec3b>(i,j)[k], intensity);
         return result;
     }
 };
