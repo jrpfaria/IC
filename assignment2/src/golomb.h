@@ -36,33 +36,52 @@ class Golomb {
             int m = ceil(-log(2-p)/log(1-p));
             return m;
         }
-        
-        void encode(int i) {
+
+        int getEncodedLength(int i) {
+            int n = 0;
             int q, r;
 
-            // Encode the sign bit first.
             if (method)
-                bs.write(i < 0);
+                n++;
             else
                 i = (i < 0) ? abs(i << 1) - 1 : (i << 1);
             
-            // Encode the absolute value of i.
             i = abs(i);
             q = floor(i / m);
             r = i % m;
 
-            // Encode the quotient: unary code.
+            n += q+1;
+
+            int b = ceil(log2(m));
+            int u = (1 << b) - m;
+            (r < u) ? n += b-1 : n += b;
+
+            return n;
+        }
+        
+        void encode(int i) {
+            int q, r;
+
+            if (method)
+                // Encode the sign bit
+                bs.write(i < 0);
+            else
+                // Positive values at even (2x), negative values at odd (-2x-1)
+                i = (i < 0) ? abs(i << 1) - 1 : (i << 1);
+            
+            // Encode the absolute value of i
+            i = abs(i);
+            q = floor(i / m);
+            r = i % m;
+
+            // Encode the quotient: unary code
             for (int j = 0; j < q; j++)
                 bs.write(1);
             bs.write(0);
 
-            // Encode the remainder: binary code
-            // Check the need to use truncated binary.
+            // Encode the remainder with the appropriate number of bits
             int b = ceil(log2(m));
             int u = (1 << b) - m;
-            
-            // If truncated binary is used
-            // Check if the remainder is greater or equal to 2^b - m.
             (r < u) ? bs.write(r, b-1) : bs.write(r+u, b);
         }
 
@@ -76,14 +95,12 @@ class Golomb {
                 s = bs.read() ? -1 : 1;
             }
 
-            // Decode the absolute value of the integer.
             int q = 0, r = 0;
             
             // Decode the quotient from the unary code.
             while (bs.read()) q++;
 
-            // Decode the remainder from the binary code.
-            // Check if truncated binary is used.
+            // Decode the remainder with the appropriate number of bits
             int b = ceil(log2(m));
             int u = (1 << b) - m;
             
@@ -95,6 +112,7 @@ class Golomb {
             // Reconstruct the integer.
             i = s * (q*m + r);
 
+            // Even values to positive (x/2), odd values to negative (-(x+1)/2)
             if (!method){
                 s = i % 2;
                 i = s == 1 ? -((i + 1) >> 1) : i >> 1;

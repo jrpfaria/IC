@@ -8,18 +8,26 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 	bool verbose { false };
+	bool lossy { false };
+	double averageBitRate = 0;
 
 	if(argc < 3) {
-		cerr << "Usage: audio_encoder [ -v (verbose) ]\n";
+		cerr << "Usage: audio_encoder [ -v (verbose) ] [ -b averageBitRate ] \n";
 		cerr << "               wavFileIn FileOut\n";
 		return 1;
 	}
 
-	for(int n = 1 ; n < argc ; n++)
+	for(int n = 1 ; n < argc ; n++) {
 		if(string(argv[n]) == "-v") {
 			verbose = true;
 			break;
 		}
+		if(string(argv[n]) == "-b") {
+			lossy = true;
+			averageBitRate = stod(argv[n+1]);
+			break;
+		}
+	}
 
 	SndfileHandle sfhIn { argv[argc-2] };
 	if(sfhIn.error()) {
