@@ -68,7 +68,7 @@ namespace ppmeffects {
         else if (angle == 180) result = Mat::zeros(height, width, CV_8UC3);
         else return image;
 
-        switch (angle % 360){
+        switch (angle){
             case 90:
                 for (int i = 0; i < height; i++) 
                     for (int j = 0; j < width; j++)
