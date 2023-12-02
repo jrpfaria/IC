@@ -19,6 +19,9 @@ int main(int argc, char *argv[]) {
 	size_t nChannels = bitstreamInput.readInt(16);
 	size_t nFrames = bitstreamInput.readInt(32);
 	int samplerate = bitstreamInput.readInt(16);
+	bool lossy = bitstreamInput.read();
+	int blockSize = 0;
+	if (lossy) blockSize = bitstreamInput.readInt(16);
 	
 	SndfileHandle sfhOut { argv[argc-1], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, int(nChannels), samplerate };
 	if(sfhOut.error()) {
@@ -28,8 +31,18 @@ int main(int argc, char *argv[]) {
 
 	vector<int> pred;
 	Golomb g = Golomb(bitstreamInput, m, 0);
-	for (int i = 0; i < int(nChannels * nFrames); i++) {
-		pred.push_back(g.decode());
+	if (!lossy) {
+		for (int i = 0; i < int(nChannels * nFrames); i++) {
+			pred.push_back(g.decode());
+		}
+	}
+	else {
+		for (int i = 0; i < int(nChannels * nFrames); i+=blockSize) {
+			int bitsRemoved = bitstreamInput.readInt(16);
+			for (int j = 0; (j < blockSize) && (i+j < int(nChannels * nFrames)); j++) {
+				pred.push_back(g.decode()>>bitsRemoved);
+			}
+		}
 	}
 
 	vector<short> samples(nChannels * nFrames);

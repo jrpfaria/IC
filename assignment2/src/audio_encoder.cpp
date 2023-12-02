@@ -10,9 +10,10 @@ int main(int argc, char *argv[]) {
 	bool verbose { false };
 	bool lossy { false };
 	double averageBitRate = 0;
+	int blockSize = 0;
 
 	if(argc < 3) {
-		cerr << "Usage: audio_encoder [ -v (verbose) ] [ -b averageBitRate ] \n";
+		cerr << "Usage: audio_encoder [ -v (verbose) ] [ -ab averageBitRate ] [ -bs blockSize ]\n";
 		cerr << "               wavFileIn FileOut\n";
 		return 1;
 	}
@@ -20,12 +21,13 @@ int main(int argc, char *argv[]) {
 	for(int n = 1 ; n < argc ; n++) {
 		if(string(argv[n]) == "-v") {
 			verbose = true;
-			break;
 		}
-		if(string(argv[n]) == "-b") {
+		if(string(argv[n]) == "-ab") {
 			lossy = true;
 			averageBitRate = stod(argv[n+1]);
-			break;
+		}
+		if(string(argv[n]) == "-bs") {
+			blockSize = stoi(argv[n+1]);
 		}
 	}
 
@@ -71,10 +73,47 @@ int main(int argc, char *argv[]) {
 	bitstreamOutput.write(nChannels,16);
 	bitstreamOutput.write(nFrames,32);
 	bitstreamOutput.write(sfhIn.samplerate(),16);
+	bitstreamOutput.write(lossy);
+	if (lossy) bitstreamOutput.write(blockSize,16);
 
 	Golomb g = Golomb(bitstreamOutput, m, 0);
-	for (auto p: pred) {
-		g.encode(p);
+	if (!lossy) {
+		for (auto p: pred) {
+			g.encode(p);
+		}
+	}
+	else {
+		int blockBits = (blockSize/(2*sfhIn.samplerate()))*averageBitRate;
+		int reserve = 0;
+		int lastValue = 0;
+		for (int i = 0; i < int(nChannels * nFrames); i+=blockSize) {
+			vector<int> predBlock(blockSize);
+			bool valid = false;
+			int bitsRemoved = 0;
+			cout << endl << i << endl;
+			while (!valid) {
+				cout << bitsRemoved << " ";
+				int nBits = 0;
+				for (int j = 0; (j < blockSize) && (i+j < int(nChannels * nFrames)); j++) {
+					int p = (samples[i+j]-lastValue)>>bitsRemoved;
+					predBlock[j] = p;
+					nBits += g.getEncodedLength(p);
+					lastValue = lastValue + (p<<bitsRemoved);
+				}
+				cout << nBits << "n";
+				if (nBits<=blockBits) {
+					reserve += blockBits-nBits;
+					valid = true;
+				}
+				else if (nBits<=blockBits+reserve) {
+					reserve -= nBits-blockBits;
+					valid = true;
+				}
+				else bitsRemoved++;
+			}
+			bitstreamOutput.write(bitsRemoved,16);
+			for (auto p: predBlock) g.encode(p);
+		}
 	}
 
     bitstreamOutput.close();
