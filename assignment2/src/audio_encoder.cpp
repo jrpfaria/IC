@@ -11,10 +11,10 @@ int main(int argc, char *argv[]) {
 	bool lossy { false };
 	double averageBitRate = 0;
 	int blockSize = 0;
-	bool mode = 0;
+	bool method = 0;
 
 	if(argc < 3) {
-		cerr << "Usage: audio_encoder [ -v (verbose) ] [ -ab averageBitRate ] [ -bs blockSize ] [-m mode]\n";
+		cerr << "Usage: audio_encoder [ -v (verbose) ] [ -ab averageBitRate ] [ -bs blockSize ] [-m method]\n";
 		cerr << "               wavFileIn FileOut\n";
 		return 1;
 	}
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 			blockSize = stoi(argv[n+1]);
 		}
 		if(string(argv[n]) == "-m") {
-			mode = stoi(argv[n+1]);
+			method = stoi(argv[n+1]);
 		}
 	}
 
@@ -77,13 +77,13 @@ int main(int argc, char *argv[]) {
 	bitstreamOutput.write(nChannels,16);
 	bitstreamOutput.write(nFrames,32);
 	bitstreamOutput.write(sfhIn.samplerate(),16);
-	bitstreamOutput.write(mode);
+	bitstreamOutput.write(method);
 	bitstreamOutput.write(lossy);
 	if (lossy) bitstreamOutput.write(blockSize,16);
 	else bitstreamOutput.write(m, 16);
 
 	if (!lossy) {
-		Golomb g = Golomb(bitstreamOutput, m, mode);
+		Golomb g = Golomb(bitstreamOutput, m, method);
 		for (auto p: pred) {
 			g.encode(p);
 		}
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 					lastValue = lastValue + (p<<bitsRemoved);
 				}
 				m = Golomb::idealM(predBlock);
-				Golomb g = Golomb(bitstreamOutput, m, mode);
+				Golomb g = Golomb(bitstreamOutput, m, method);
 				for (auto p: predBlock) {
 					nBits += g.getEncodedLength(p);
 				}
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 			}
 			bitstreamOutput.write(m,16);
 			bitstreamOutput.write(bitsRemoved,16);
-			Golomb g = Golomb(bitstreamOutput, m, mode);
+			Golomb g = Golomb(bitstreamOutput, m, method);
 			for (auto p: predBlock) g.encode(p);
 		}
 	}

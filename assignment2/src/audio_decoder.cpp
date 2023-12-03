@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	size_t nChannels = bitstreamInput.readInt(16);
 	size_t nFrames = bitstreamInput.readInt(32);
 	int samplerate = bitstreamInput.readInt(16);
-	int mode = bitstreamInput.read();
+	int method = bitstreamInput.read();
 	bool lossy = bitstreamInput.read();
 	int blockSize = 0;
 	int m = 0;
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
 	vector<int> pred;
 	if (!lossy) {
-		Golomb g = Golomb(bitstreamInput, m, mode);
+		Golomb g = Golomb(bitstreamInput, m, method);
 		for (int i = 0; i < int(nChannels * nFrames); i++) {
 			pred.push_back(g.decode());
 		}
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	else {
 		for (int i = 0; i < int(nChannels * nFrames); i+=blockSize) {
 			m = bitstreamInput.readInt(16);
-			Golomb g = Golomb(bitstreamInput, m, mode);
+			Golomb g = Golomb(bitstreamInput, m, method);
 			int bitsRemoved = bitstreamInput.readInt(16);
 			for (int j = 0; (j < blockSize) && (i+j < int(nChannels * nFrames)); j++) {
 				pred.push_back(g.decode()<<bitsRemoved);
