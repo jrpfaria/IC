@@ -71,6 +71,12 @@ int main(int argc, char *argv[]) {
         }
         outputImage = changeIntensity(inputImage,intensity);
     }
+
+    else if (effect == "gray")
+    {
+        outputImage = grayScale(inputImage);
+    }
+
     else
     {
         cerr << "Invalid effect! Available: extract, negative, mirror, rotate and light" << endl;

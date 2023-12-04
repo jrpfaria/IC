@@ -27,6 +27,13 @@ do
     ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$file.png $effect
 done
 
+effect="gray"
+mkdir -p ../result_images/$effect
+for file in ${file_names[@]}
+do
+    ../bin/ppm_effects ../images/$file.ppm ../result_images/$effect/$file.pgm $effect
+done
+
 effect="mirror"
 mkdir -p ../result_images/$effect
 for extra in ${mirror_options[@]}

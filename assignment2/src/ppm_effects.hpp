@@ -114,6 +114,14 @@ namespace ppmeffects {
                     result.at<Vec3b>(i,j)[k] = adaptIntensity(image.at<Vec3b>(i,j)[k], intensity);
         return result;
     }
+
+    static Mat grayScale(Mat image){
+        Mat result = Mat::zeros(image.rows, image.cols, CV_8UC1);
+        for (int i = 0; i < image.rows; i++) 
+            for (int j = 0; j < image.cols; j++) 
+                result.at<uchar>(i,j) = (image.at<Vec3b>(i,j)[0]*0.114 + image.at<Vec3b>(i,j)[1]*0.587 + image.at<Vec3b>(i,j)[2])*0.299;
+        return result;
+    }
 };
 
 #endif
