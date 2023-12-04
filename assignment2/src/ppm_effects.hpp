@@ -62,13 +62,14 @@ namespace ppmeffects {
         int width = image.cols;
         int height = image.rows;
 
-        angle = (angle % 360) >= 0 ? (angle % 360) : (angle % 360) + 360;
+        angle = angle % 360; 
+        if (angle < 0) angle += 360;
 
         if ((angle == 90) || (angle == 270)) result = Mat::zeros(width, height, CV_8UC3);
         else if (angle == 180) result = Mat::zeros(height, width, CV_8UC3);
-        else result = image.clone();
+        else return image;
 
-        switch (angle % 360){
+        switch (angle){
             case 90:
                 for (int i = 0; i < height; i++) 
                     for (int j = 0; j < width; j++)
