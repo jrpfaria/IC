@@ -70,7 +70,7 @@ namespace ppmeffects {
         else return image;
 
         switch (angle){
-            case 90:
+            case 270:
                 for (int i = 0; i < height; i++) 
                     for (int j = 0; j < width; j++)
                         for (int k = 0; k < 3; k++)
@@ -82,7 +82,7 @@ namespace ppmeffects {
                         for (int k = 0; k < 3; k++)
                             result.at<Vec3b>(height - 1 - i, width - 1 - j)[k] = image.at<Vec3b>(i, j)[k];
                 break;
-            case 270:
+            case 90:
                 for (int i = 0; i < height; i++) 
                     for (int j = 0; j < width; j++)
                         for (int k = 0; k < 3; k++)
