@@ -19,36 +19,32 @@ class yuv_reader
         {
             std::string line;
             file.open(file_name);
+            
             if (!file.is_open())
                 throw std::runtime_error(file_name + " - could not be opened.");
             
-            
-
             std::getline(file, line);
             sscanf(line.c_str(), "YUV4MPEG2 W%d H%d F%d:%d",
                 &resolution[0], &resolution[1],
                 &frame_rate[0], &frame_rate[1]);
 
-            // check if the color space is defined
+            // if color space is not defined set it to 420
             if (!strchr(line.c_str(), 'C'))
                 color_space = "420";
             else
             {
-                // extract the color space that starts with 'C'
+                // extract the color space
                 color_space = line.substr(line.find('C') + 1);
                 std::cout << "here" << std::endl;
             }
 
-            // check if the interlace is defined
+            // if interlace is defined extract it else set it to progressive
             if (!strchr(line.c_str(), 'I'))
                 interlace = "p";
             else
-            {
-                // extract the interlace that starts with 'I' with the next character
                 interlace = line.substr(line.find('I') + 1, 1);
-            }
 
-            // check if the aspect ratio is defined
+            // if the aspect ratio is defined extract it else set it to 1:1
             if (!strchr(line.c_str(), 'A'))
             {
                 aspect_ratio[0] = 1;
@@ -56,7 +52,6 @@ class yuv_reader
             }
             else
             {
-                // extract the aspect ratio that starts with 'A'
                 std::string aspect_ratio = line.substr(line.find('A') + 1);
 
                 aspect_ratio[0] = std::stoi(aspect_ratio.substr(0, aspect_ratio.find(':')));
