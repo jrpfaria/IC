@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "frame.hpp"
+#include <cstring>
 
 class yuv_reader
 {
