@@ -15,7 +15,7 @@ class frame{
             this->width = width;
             this->height = height;
 
-            char* pixels = new char[width * height];
+            this->pixels = new char[width * height];
         }
 
         // \brief Set the pixel at (x, y) to the given char value (pixel)
