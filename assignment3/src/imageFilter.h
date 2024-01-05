@@ -7,20 +7,15 @@
 
 #include <opencv2/opencv.hpp>
 
+// Set desired block dimension
+#define blockWidth  192 // random for now
+#define blockHeight 108 // random for now
+
 using namespace std;
 using namespace cv;
 
 namespace imageFilter
 {
-    static Mat *getFrame()
-    {
-        // convert yuv into various frames
-    }
-
-    // Set desired block dimension
-    #define blockWidth  192 // random for now
-    #define blockHeight 108 // random for now
-
     // \brief returns a Mat object with the block at (block_x, block_y)
     static Mat getBlock(Mat image, int block_x, int block_y)
     {
