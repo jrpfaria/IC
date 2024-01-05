@@ -1,3 +1,6 @@
+#ifndef YUV_READER_H
+#define YUV_READER_H
+
 #include <string>
 #include <fstream>
 #include <regex>
@@ -19,7 +22,7 @@ class yuv_reader
         {
             std::string line;
             file.open(file_name);
-            
+
             if (!file.is_open())
                 throw std::runtime_error(file_name + " - could not be opened.");
             
@@ -58,11 +61,36 @@ class yuv_reader
                 aspect_ratio[1] = std::stoi(aspect_ratio.substr(aspect_ratio.find(':') + 1));
             }
 
-            // count the number of frames
-            frame_count = 0;
-            while (std::getline(file, line))
-                if (line.find("FRAME") != std::string::npos)
-                    frame_count++;
+            // process frame data
+            switch(stoi(color_space))
+            {
+                case 420:
+                    frame_count = 0;
+                    while (std::getline(file, line))
+                        if (line.find("FRAME") != std::string::npos)
+                            frame_count++;
+                        else
+                            // read the yuv values and store somewhere
+                    break;
+                case 422:
+                    frame_count = 0;
+                    while (std::getline(file, line))
+                        if (line.find("FRAME") != std::string::npos)
+                            frame_count++;
+                        else    
+                            // read the yuv values and store somewhere
+                    break;
+                case 444:
+                    frame_count = 0;
+                    while (std::getline(file, line))
+                        if (line.find("FRAME") != std::string::npos)
+                            frame_count++;
+                        else    
+                            // read the yuv values and store somewhere
+                    break;
+                default:
+                    throw std::runtime_error("Invalid color space.");
+            }
         }
 
         int *get_resolution()
@@ -95,3 +123,5 @@ class yuv_reader
             return color_space;
         }
 };
+
+#endif
