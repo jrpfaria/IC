@@ -5,6 +5,8 @@
 #include <fstream>
 #include <regex>
 #include <iostream>
+#include <vector>
+#include "frame.h"
 
 class yuv_reader
 {
@@ -16,6 +18,7 @@ class yuv_reader
         int frame_rate[2];
         int frame_count;
         std::string color_space;
+        std::vector<frame> frames;
 
     public:
         yuv_reader(const std::string &file_name)
@@ -61,36 +64,17 @@ class yuv_reader
                 aspect_ratio[1] = std::stoi(aspect_ratio.substr(aspect_ratio.find(':') + 1));
             }
 
-            // process frame data
-            switch(stoi(color_space))
-            {
-                case 420:
-                    frame_count = 0;
-                    while (std::getline(file, line))
-                        if (line.find("FRAME") != std::string::npos)
-                            frame_count++;
-                        else
-                            // read the yuv values and store somewhere
-                    break;
-                case 422:
-                    frame_count = 0;
-                    while (std::getline(file, line))
-                        if (line.find("FRAME") != std::string::npos)
-                            frame_count++;
-                        else    
-                            // read the yuv values and store somewhere
-                    break;
-                case 444:
-                    frame_count = 0;
-                    while (std::getline(file, line))
-                        if (line.find("FRAME") != std::string::npos)
-                            frame_count++;
-                        else    
-                            // read the yuv values and store somewhere
-                    break;
-                default:
-                    throw std::runtime_error("Invalid color space.");
-            }
+            
+            frame_count = 0;
+            while (std::getline(file, line))
+                if (line.find("FRAME") != std::string::npos)
+                    frame_count++;
+                else
+                    frame current_frame(resolution[0], resolution[1]);
+                    for (int i = 0; i < resolution[1]; i++)
+                        for (int j = 0; j < resolution[0]; j++)
+                            current_frame.set_pixel(j, i, line[i * resolution[0] + j]);
+                    frames.push_back(current_frame);
         }
 
         int *get_resolution()
@@ -121,6 +105,11 @@ class yuv_reader
         std::string get_color_space()
         {
             return color_space;
+        }
+
+        frame *get_frames()
+        {
+            return frames;
         }
 };
 
