@@ -14,5 +14,5 @@ SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_DIR}/../bin)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-add_executable (yuv_reader reader.cpp)
-target_link_libraries (yuv_reader ${OpenCV_LIBS})
+add_executable (frame yuv_reader reader.cpp)
+target_link_libraries (frame yuv_reader ${OpenCV_LIBS})
