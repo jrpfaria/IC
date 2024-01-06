@@ -173,6 +173,55 @@ class yuv_reader
         {
             return color_space;
         }
+
+        void yuv_writer(const std::string &file_name)
+        {
+            std::ofstream file;
+            file.open(file_name, std::ios::out | std::ios::binary);
+            if (!file.is_open())
+                throw std::runtime_error(file_name + " - could not be opened for writing.");
+
+            // Write YUV file header
+            file << "W" << this->resolution[0] << " H" << this->resolution[1] << " F30 C";
+
+            switch (this->color_space)
+            {
+                case ColorSpace::C420jpeg:
+                    file << "420jpeg";
+                    break;
+                case ColorSpace::C420paldv:
+                    file << "420paldv";
+                    break;
+                // missing some cases
+
+                default:
+                    file << "420"; // Default to C420 if not specified
+                }
+
+            file << " I" << "Ip A1:1\n";
+        }
+
+        void write_frame(const std::string &file_name, const Mat &frame)
+        {
+            std::ofstream file;
+            file.open(file_name, std::ios::out | std::ios::binary | std::ios::app);
+            if (!file.is_open())
+                throw std::runtime_error(file_name + " - could not be opened for writing.");
+            
+            // Write the "FRAME" header
+            file << "FRAME\n";
+
+            // Write YUV frame data
+            for (int h = 0; h < frame.rows; ++h)
+            {
+                for (int w = 0; w < frame.cols; ++w)
+                {
+                    char pixel_value = frame.at<uchar>(h, w);
+                    file.write(&pixel_value, 1);
+                }
+            }
+        }
+        
 };
 
 #endif

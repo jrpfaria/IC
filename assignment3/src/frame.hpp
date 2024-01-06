@@ -1,6 +1,15 @@
 #ifndef frame_h
 #define frame_h
 
+#include <opencv2/opencv.hpp>
+
+// Set desired block dimension
+#define blockWidth  192 // random for now
+#define blockHeight 108 // random for now
+
+using namespace std;
+using namespace cv;
+
 class frame{
     private:
         int width;
@@ -19,7 +28,7 @@ class frame{
         }
 
         // \brief Set the pixel at (x, y) to the given char value (pixel)
-        void set_pixel(int x, int y, char pixel){
+        void set_pixel(int x, int y, unsigned char pixel){
             int index = (y * width + x);
             pixels[index] = pixel;
         }
