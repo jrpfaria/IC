@@ -11,16 +11,34 @@
 
 using namespace cv;
 
+enum class ColorSpace {
+    C420jpeg,
+    C420paldv,
+    C420mpeg2,
+    C420,
+    C422,
+    C444,
+    C444alpha,
+    mono,
+};
+
+enum class Interlace {
+    Ip,
+    It,
+    Ib,
+    Im,
+};
+
 class yuv_reader
 {
     private:
         std::ifstream file;
         int resolution[2];
-        std::string interlace;
+        Interlace interlace;
         int aspect_ratio[2];
         int frame_rate[2];
         int frame_count;
-        std::string color_space;
+        ColorSpace color_space;
 
     public:
         yuv_reader(const std::string &file_name)
@@ -42,18 +60,51 @@ class yuv_reader
             // if color space is not defined set it to 420
             if (!strchr(line.c_str(), 'C'))
                 color_space = "420";
+                // color_space = ColorSpace::C420;
             else
             {
                 // extract the color space
                 color_space = line.substr(line.find('C') + 1);
                 color_space = color_space.substr(0, color_space.find(' '));
+
+                // std::string color_space_str = line.substr(line.find('C') + 1);
+                // color_space_str = color_space_str.substr(0, color_space_str.find(' '));
+
+                // if (color_space_str == "420jpeg")
+                //     color_space = ColorSpace::C420jpeg;
+                // else if (color_space_str == "420paldv")
+                //     color_space = ColorSpace::C420paldv;
+                // else if (color_space_str == "420mpeg2")
+                //     color_space = ColorSpace::C420mpeg2;
+                // else if (color_space_str == "420")
+                //     color_space = ColorSpace::C420;
+                // else if (color_space_str == "422")
+                //     color_space = ColorSpace::C422;
+                // else if (color_space_str == "444")
+                //     color_space = ColorSpace::C444;
+                // else if (color_space_str == "444alpha")
+                //     color_space = ColorSpace::C444alpha;
+                // else if (color_space_str == "mono")
+                //     color_space = ColorSpace::mono;
+
             }
 
             // if interlace is defined extract it else set it to progressive
             if (!strchr(line.c_str(), 'I'))
-                interlace = "p";
+                interlace = Interlace::Ip;
             else
                 interlace = line.substr(line.find('I') + 1, 1);
+
+                // std::string interlace_str = line.substr(line.find('I') + 1, 1);
+
+                // if (interlace_str == "Ip")
+                //     interlace = Interlace::Ip;
+                // else if (interlace_str == "It")
+                //     interlace = Interlace::It;
+                // else if (interlace_str == "Ib")
+                //     interlace = Interlace::Ib;
+                // else if (interlace_str == "Im")
+                //     interlace = Interlace::Im;
 
             // if the aspect ratio is defined extract it else set it to 1:1
             if (!strchr(line.c_str(), 'A'))
@@ -104,7 +155,7 @@ class yuv_reader
             return resolution;
         }
 
-        std::string get_interlace()
+        Interlace get_interlace()
         {
             return interlace;
         }
@@ -124,7 +175,7 @@ class yuv_reader
             return frame_count;
         }
 
-        std::string get_color_space()
+        ColorSpace get_color_space()
         {
             return color_space;
         }
