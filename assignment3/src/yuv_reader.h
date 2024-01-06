@@ -6,8 +6,10 @@
 #include <regex>
 #include <iostream>
 #include <vector>
-#include "frame.hpp"
 #include <cstring>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 
 class yuv_reader
 {
@@ -19,7 +21,6 @@ class yuv_reader
         int frame_rate[2];
         int frame_count;
         std::string color_space;
-        std::vector<unsigned char*> frames;
 
     public:
         yuv_reader(const std::string &file_name)
@@ -31,9 +32,12 @@ class yuv_reader
                 throw std::runtime_error(file_name + " - could not be opened.");
             
             std::getline(file, line);
-            sscanf(line.c_str(), "YUV4MPEG2 W%d H%d F%d:%d",
-                &resolution[0], &resolution[1],
-                &frame_rate[0], &frame_rate[1]);
+            
+            // get resolution and frame rate
+            resolution[0] = stoi(line.substr(line.find('W') + 1));
+            resolution[1] = stoi(line.substr(line.find('H') + 1));
+            frame_rate[0] = stoi(line.substr(line.find('F') + 1));
+            frame_rate[0] = stoi(line.substr(line.find(':') + 1));
 
             // if color space is not defined set it to 420
             if (!strchr(line.c_str(), 'C'))
@@ -42,7 +46,7 @@ class yuv_reader
             {
                 // extract the color space
                 color_space = line.substr(line.find('C') + 1);
-                std::cout << "here" << std::endl;
+                color_space = color_space.substr(0, color_space.find(' '));
             }
 
             // if interlace is defined extract it else set it to progressive
@@ -70,14 +74,29 @@ class yuv_reader
             while (std::getline(file, line))
                 if (line.find("FRAME") != std::string::npos)
                     frame_count++;
-                // else
-                // {
-                //     frame current_frame(resolution[0], resolution[1]);
-                //     for (int i = 0; i < resolution[1]; i++)
-                //         for (int j = 0; j < resolution[0]; j++)
-                //             current_frame.set_pixel(j, i, line[i * resolution[0] + j]);
-                //     frames.push_back(current_frame.get_pixels());
-                // }           
+            file.clear();
+            file.seekg(0);
+        }
+
+        Mat get_frame(int n) {
+            Mat pixels = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
+            int count = 0;
+            std::string line;
+            while (std::getline(file, line)) {
+                if (line.find("FRAME") != std::string::npos) {
+                    if (count++==n) {
+                        for (int h = 0; h < resolution[1]; h++) {
+                            for (int w = 0; w < resolution[0]; w++) {
+                                char c = 0;
+                                file.read(&c, 1);
+                                pixels.at<uchar>(h,w) = c;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            return pixels;
         }
 
         int *get_resolution()
@@ -108,11 +127,6 @@ class yuv_reader
         std::string get_color_space()
         {
             return color_space;
-        }
-
-        std::vector<unsigned char*> get_frames()
-        {
-            return frames;
         }
 };
 

@@ -16,3 +16,6 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 add_executable (yuv_reader reader.cpp)
 target_link_libraries (yuv_reader ${OpenCV_LIBS})
+
+add_executable (frame_encoder frame_encoder.cpp)
+target_link_libraries (frame_encoder ${OpenCV_LIBS})
