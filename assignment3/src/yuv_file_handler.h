@@ -29,10 +29,10 @@ enum Interlace {
     Im,
 };
 
-class yuv_reader
+class yuv_file_handler
 {
     private:
-        std::ifstream file;
+        std::fstream file;
         int resolution[2];
         Interlace interlace;
         int aspect_ratio[2];
@@ -41,7 +41,7 @@ class yuv_reader
         ColorSpace color_space;
 
     public:
-        yuv_reader(const std::string &file_name)
+        yuv_file_handler(const std::string &file_name)
         {
             std::string line;
             file.open(file_name);
@@ -176,7 +176,6 @@ class yuv_reader
 
         void yuv_writer(const std::string &file_name)
         {
-            std::ofstream file;
             file.open(file_name, std::ios::out | std::ios::binary);
             if (!file.is_open())
                 throw std::runtime_error(file_name + " - could not be opened for writing.");
@@ -203,7 +202,6 @@ class yuv_reader
 
         void write_frame(const std::string &file_name, const Mat &frame)
         {
-            std::ofstream file;
             file.open(file_name, std::ios::out | std::ios::binary | std::ios::app);
             if (!file.is_open())
                 throw std::runtime_error(file_name + " - could not be opened for writing.");

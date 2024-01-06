@@ -1,5 +1,5 @@
 #include <iostream>
-#include "yuv_reader.h"
+#include "yuv_file_handler.h"
 #include "golomb.h"
 #include <stdio.h>
 #include <opencv2/opencv.hpp>

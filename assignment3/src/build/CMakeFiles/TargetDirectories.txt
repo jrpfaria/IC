@@ -1,0 +1,5 @@
+/home/rodrigofaria/Desktop/MECT/IC/assignment3/src/build/CMakeFiles/yuv_reader.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment3/src/build/CMakeFiles/frame_encoder.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment3/src/build/CMakeFiles/frame_decoder.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment3/src/build/CMakeFiles/edit_cache.dir
+/home/rodrigofaria/Desktop/MECT/IC/assignment3/src/build/CMakeFiles/rebuild_cache.dir

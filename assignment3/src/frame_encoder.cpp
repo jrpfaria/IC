@@ -1,5 +1,5 @@
 #include <iostream>
-#include "yuv_reader.h"
+#include "yuv_file_handler.h"
 #include "golomb.h"
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    yuv_reader image = yuv_reader(argv[1]);
+    yuv_file_handler image = yuv_file_handler(argv[1]);
     int* resolution = image.get_resolution();
     vector<int> pred(resolution[0]*resolution[1]);
     Mat frame = image.get_frame(50);
