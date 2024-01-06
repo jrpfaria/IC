@@ -27,10 +27,6 @@ class BitStream {
             }
         }
 
-        int tellg() {
-            return f.tellg();
-        }
-        
         unsigned char read() {
             if (free==8) {
                 char c = 0;

@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     yuv_reader image = yuv_reader(argv[1]);
     int* resolution = image.get_resolution();
     vector<int> pred(resolution[0]*resolution[1]);
-    Mat frame = image.get_frame(0);
+    Mat frame = image.get_frame(50);
     for (int h = 0; h < resolution[1]; h++) {
         for (int w = 0; w < resolution[0]; w++) {
             if (h==0 && w==0) pred[h*resolution[0]+w] = frame.at<uchar>(h,w);
@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     }
     int m = Golomb::idealM(pred);
     BitStream bitstreamOutput {argv[2], 0};
-    bitstreamOutput.write(image.get_resolution()[0],16);
-    bitstreamOutput.write(image.get_resolution()[1],16);
+    bitstreamOutput.write(resolution[0],16);
+    bitstreamOutput.write(resolution[1],16);
     bitstreamOutput.write(image.get_aspect_ratio()[0],16);
     bitstreamOutput.write(image.get_aspect_ratio()[1],16);
     bitstreamOutput.write(image.get_frame_rate()[0],16);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     bitstreamOutput.write(m,16);
     bitstreamOutput.write(method,16);
     Golomb g = Golomb(bitstreamOutput, m, method);
-    for (auto p: pred) cout << p << endl, g.encode(p);
+    for (auto p: pred) g.encode(p);
     bitstreamOutput.close();
     return 0;
 }

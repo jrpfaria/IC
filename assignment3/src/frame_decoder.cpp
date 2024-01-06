@@ -30,12 +30,10 @@ int main(int argc, char *argv[])
     int m = bitstreamInput.readInt(16);
     int method = bitstreamInput.readInt(16);
     Golomb g = Golomb(bitstreamInput, m, method);
-
     Mat frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
     for (int h = 0; h < resolution[1]; h++) {
         for (int w = 0; w < resolution[0]; w++) {
             int p = g.decode();
-            std::cout << p << endl;
             if (h==0 && w==0) frame.at<uchar>(h,w) = p;
             else if (h==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h,w-1)/3);
             else if (w==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h-1,w)/3);

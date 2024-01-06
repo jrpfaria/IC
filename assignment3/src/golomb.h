@@ -33,8 +33,9 @@ class Golomb {
             e /= values.size();
             double p = 1;
             p /= e;
-            int m = ceil(-log(2-p)/log(1-p));
-            return m;
+            double m = ceil(-log(2-p)/log(1-p));
+            if (m!=m) return 5000;
+            return (int)m;
         }
 
         int getEncodedLength(int i) {
