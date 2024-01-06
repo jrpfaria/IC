@@ -19,3 +19,6 @@ target_link_libraries (yuv_reader ${OpenCV_LIBS})
 
 add_executable (frame_encoder frame_encoder.cpp)
 target_link_libraries (frame_encoder ${OpenCV_LIBS})
+
+add_executable (frame_decoder frame_decoder.cpp)
+target_link_libraries (frame_decoder ${OpenCV_LIBS})

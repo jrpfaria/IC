@@ -11,7 +11,7 @@
 
 using namespace cv;
 
-enum class ColorSpace {
+enum ColorSpace {
     C420jpeg,
     C420paldv,
     C420mpeg2,
@@ -19,10 +19,10 @@ enum class ColorSpace {
     C422,
     C444,
     C444alpha,
-    mono,
+    Cmono,
 };
 
-enum class Interlace {
+enum Interlace {
     Ip,
     It,
     Ib,
@@ -59,52 +59,46 @@ class yuv_reader
 
             // if color space is not defined set it to 420
             if (!strchr(line.c_str(), 'C'))
-                color_space = "420";
-                // color_space = ColorSpace::C420;
+                color_space = ColorSpace::C420;
             else
             {
                 // extract the color space
-                color_space = line.substr(line.find('C') + 1);
-                color_space = color_space.substr(0, color_space.find(' '));
+                String color_space_str = line.substr(line.find('C'));
+                color_space_str = color_space_str.substr(0, color_space_str.find(' '));
 
-                // std::string color_space_str = line.substr(line.find('C') + 1);
-                // color_space_str = color_space_str.substr(0, color_space_str.find(' '));
-
-                // if (color_space_str == "420jpeg")
-                //     color_space = ColorSpace::C420jpeg;
-                // else if (color_space_str == "420paldv")
-                //     color_space = ColorSpace::C420paldv;
-                // else if (color_space_str == "420mpeg2")
-                //     color_space = ColorSpace::C420mpeg2;
-                // else if (color_space_str == "420")
-                //     color_space = ColorSpace::C420;
-                // else if (color_space_str == "422")
-                //     color_space = ColorSpace::C422;
-                // else if (color_space_str == "444")
-                //     color_space = ColorSpace::C444;
-                // else if (color_space_str == "444alpha")
-                //     color_space = ColorSpace::C444alpha;
-                // else if (color_space_str == "mono")
-                //     color_space = ColorSpace::mono;
-
+                if (color_space_str == "C420jpeg")
+                    color_space = ColorSpace::C420jpeg;
+                else if (color_space_str == "C420paldv")
+                    color_space = ColorSpace::C420paldv;
+                else if (color_space_str == "C420mpeg2")
+                    color_space = ColorSpace::C420mpeg2;
+                else if (color_space_str == "C420")
+                    color_space = ColorSpace::C420;
+                else if (color_space_str == "C422")
+                    color_space = ColorSpace::C422;
+                else if (color_space_str == "C444")
+                    color_space = ColorSpace::C444;
+                else if (color_space_str == "C444alpha")
+                    color_space = ColorSpace::C444alpha;
+                else if (color_space_str == "Cmono")
+                    color_space = ColorSpace::Cmono;
             }
 
             // if interlace is defined extract it else set it to progressive
             if (!strchr(line.c_str(), 'I'))
                 interlace = Interlace::Ip;
-            else
-                interlace = line.substr(line.find('I') + 1, 1);
+            else {
+                String interlace_str = line.substr(line.find('I'), 1);
 
-                // std::string interlace_str = line.substr(line.find('I') + 1, 1);
-
-                // if (interlace_str == "Ip")
-                //     interlace = Interlace::Ip;
-                // else if (interlace_str == "It")
-                //     interlace = Interlace::It;
-                // else if (interlace_str == "Ib")
-                //     interlace = Interlace::Ib;
-                // else if (interlace_str == "Im")
-                //     interlace = Interlace::Im;
+                if (interlace_str == "Ip")
+                    interlace = Interlace::Ip;
+                else if (interlace_str == "It")
+                    interlace = Interlace::It;
+                else if (interlace_str == "Ib")
+                    interlace = Interlace::Ib;
+                else if (interlace_str == "Im")
+                    interlace = Interlace::Im;
+            }
 
             // if the aspect ratio is defined extract it else set it to 1:1
             if (!strchr(line.c_str(), 'A'))

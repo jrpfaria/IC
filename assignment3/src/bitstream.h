@@ -26,6 +26,10 @@ class BitStream {
                 this->f = fstream(file, std::fstream::out | std::fstream::binary);
             }
         }
+
+        int tellg() {
+            return f.tellg();
+        }
         
         unsigned char read() {
             if (free==8) {

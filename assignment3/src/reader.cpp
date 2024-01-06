@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
     }
 
     yuv_reader image = yuv_reader(argv[1]);
-    Mat frame0 = image.get_frame(150);
-    cv::imwrite("./frame0.png",frame0);
+    Mat frame = image.get_frame(0);
+    cv::imwrite("./frame0.png",frame);
 
     return 0;
 }
