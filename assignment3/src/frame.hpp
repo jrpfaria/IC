@@ -5,7 +5,7 @@ class frame{
     private:
         int width;
         int height;
-        char* pixels;
+        unsigned char* pixels;
 
         // \brief To make a grey scale image, we set the U and V values to 127
         int uv_values = 127;
@@ -15,7 +15,7 @@ class frame{
             this->width = width;
             this->height = height;
 
-            this->pixels = new char[width * height];
+            this->pixels = new unsigned char[width * height];
         }
 
         // \brief Set the pixel at (x, y) to the given char value (pixel)
@@ -32,12 +32,12 @@ class frame{
             return height;
         }
 
-        char* get_pixels(){
+        unsigned char* get_pixels(){
             return pixels;
         }
 
         // \brief Get the pixel at (x, y)
-        char get_pixel(int x, int y){
+        unsigned char get_pixel(int x, int y){
             int index = (y * width + x);
             return pixels[index];
         }

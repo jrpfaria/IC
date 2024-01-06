@@ -19,7 +19,7 @@ class yuv_reader
         int frame_rate[2];
         int frame_count;
         std::string color_space;
-        std::vector<char*> frames;
+        std::vector<unsigned char*> frames;
 
     public:
         yuv_reader(const std::string &file_name)
@@ -70,14 +70,14 @@ class yuv_reader
             while (std::getline(file, line))
                 if (line.find("FRAME") != std::string::npos)
                     frame_count++;
-                else
-                {
-                    frame current_frame(resolution[0], resolution[1]);
-                    for (int i = 0; i < resolution[1]; i++)
-                        for (int j = 0; j < resolution[0]; j++)
-                            current_frame.set_pixel(j, i, line[i * resolution[0] + j]);
-                    frames.push_back(current_frame.get_pixels());
-                }           
+                // else
+                // {
+                //     frame current_frame(resolution[0], resolution[1]);
+                //     for (int i = 0; i < resolution[1]; i++)
+                //         for (int j = 0; j < resolution[0]; j++)
+                //             current_frame.set_pixel(j, i, line[i * resolution[0] + j]);
+                //     frames.push_back(current_frame.get_pixels());
+                // }           
         }
 
         int *get_resolution()
@@ -110,7 +110,7 @@ class yuv_reader
             return color_space;
         }
 
-        std::vector<char*> get_frames()
+        std::vector<unsigned char*> get_frames()
         {
             return frames;
         }
