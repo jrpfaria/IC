@@ -59,6 +59,12 @@ class Golomb {
 
             return n;
         }
+
+        int getEncodedLength(vector<int> v) {
+            int n = 0;
+            for (int i: v) n += getEncodedLength(i);
+            return n;
+        }
         
         void encode(int i) {
             int q, r;

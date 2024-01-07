@@ -15,6 +15,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    int heigth = 1;
+    int width = 1;
+    int periodicity = 1;
+
     int resolution[2];
     int aspect_ratio[2];
     int frame_rate[2];
@@ -29,6 +33,12 @@ int main(int argc, char *argv[])
     ColorSpace color_space = ColorSpace(bitstreamInput.readInt(16));
     Interlace interlace = Interlace(bitstreamInput.readInt(16));
     int method = bitstreamInput.readInt(16);
+    bool inter = bitstreamInput.readInt(1);
+    if (inter) {
+        heigth = bitstreamInput.readInt(16);
+        width = bitstreamInput.readInt(16);
+        periodicity = bitstreamInput.readInt(16);
+    }
 
     yuv_writer image = yuv_writer(argv[2]);
     image.set_resolution(resolution);
@@ -38,20 +48,36 @@ int main(int argc, char *argv[])
     image.set_interlace(interlace);
     image.write_header();
 
+    int grid[2];
+    grid[0] = ceil(resolution[0]/width);
+    grid[1] = ceil(resolution[1]/heigth);
+
+    Mat frame;
+    Mat framePrevious;
     for (int i = 0; i < frame_count; i++) {
-        int m = bitstreamInput.readInt(16);
-        Golomb g = Golomb(bitstreamInput, m, method);
-        Mat frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
-        for (int h = 0; h < resolution[1]; h++) {
-            for (int w = 0; w < resolution[0]; w++) {
-                int p = g.decode();
-                if (h==0 && w==0) frame.at<uchar>(h,w) = p;
-                else if (h==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h,w-1)/3);
-                else if (w==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h-1,w)/3);
-                else frame.at<uchar>(h,w) = p + ((frame.at<uchar>(h-1,w-1)+frame.at<uchar>(h-1,w)+frame.at<uchar>(h,w-1))/3);
+        frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
+        if (inter && i%periodicity!=0) {
+            for (int x = 0; x < grid[0]; x++) {
+                for (int y = 0; y < grid[1]; y++) {
+                    //TODO
+                }
+            }
+        }
+        else {
+            int m = bitstreamInput.readInt(16);
+            Golomb g = Golomb(bitstreamInput, m, method);
+            for (int h = 0; h < resolution[1]; h++) {
+                for (int w = 0; w < resolution[0]; w++) {
+                    int p = g.decode();
+                    if (h==0 && w==0) frame.at<uchar>(h,w) = p;
+                    else if (h==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h,w-1)/3);
+                    else if (w==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h-1,w)/3);
+                    else frame.at<uchar>(h,w) = p + ((frame.at<uchar>(h-1,w-1)+frame.at<uchar>(h-1,w)+frame.at<uchar>(h,w-1))/3);
+                }
             }
         }
         image.write_frame(frame);
+        framePrevious = frame;
     }
 
     image.close();
