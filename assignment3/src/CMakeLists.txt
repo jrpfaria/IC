@@ -14,11 +14,11 @@ SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_DIR}/../bin)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-add_executable (yuv_reader reader.cpp)
-target_link_libraries (yuv_reader ${OpenCV_LIBS})
+add_executable (reader reader.cpp)
+target_link_libraries (reader ${OpenCV_LIBS})
 
-add_executable (frame_encoder frame_encoder.cpp)
-target_link_libraries (frame_encoder ${OpenCV_LIBS})
+add_executable (video_encoder video_encoder.cpp)
+target_link_libraries (video_encoder ${OpenCV_LIBS})
 
-add_executable (frame_decoder frame_decoder.cpp)
-target_link_libraries (frame_decoder ${OpenCV_LIBS})
+add_executable (video_decoder video_decoder.cpp)
+target_link_libraries (video_decoder ${OpenCV_LIBS})

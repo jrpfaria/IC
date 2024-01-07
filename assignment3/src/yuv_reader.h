@@ -29,7 +29,7 @@ enum Interlace {
     Im,
 };
 
-class yuv_file_handler
+class yuv_reader
 {
     private:
         std::fstream file;
@@ -41,7 +41,7 @@ class yuv_file_handler
         ColorSpace color_space;
 
     public:
-        yuv_file_handler(const std::string &file_name)
+        yuv_reader(const std::string &file_name)
         {
             std::string line;
             file.open(file_name);
@@ -54,8 +54,10 @@ class yuv_file_handler
             // get resolution and frame rate
             resolution[0] = stoi(line.substr(line.find('W') + 1));
             resolution[1] = stoi(line.substr(line.find('H') + 1));
-            frame_rate[0] = stoi(line.substr(line.find('F') + 1));
-            frame_rate[0] = stoi(line.substr(line.find(':') + 1));
+            
+            String frame_rate_str = line.substr(line.find('F'));
+            frame_rate[0] = stoi(frame_rate_str.substr(1, frame_rate_str.find(':') - 1));
+            frame_rate[1] = stoi(frame_rate_str.substr(frame_rate_str.find(':') + 1, frame_rate_str.find(' ') - 1));
 
             // if color space is not defined set it to 420
             if (!strchr(line.c_str(), 'C'))
@@ -88,7 +90,8 @@ class yuv_file_handler
             if (!strchr(line.c_str(), 'I'))
                 interlace = Interlace::Ip;
             else {
-                String interlace_str = line.substr(line.find('I'), 1);
+                String interlace_str = line.substr(line.find('I'));
+                interlace_str = interlace_str.substr(0, interlace_str.find(' '));
 
                 if (interlace_str == "Ip")
                     interlace = Interlace::Ip;
@@ -108,10 +111,9 @@ class yuv_file_handler
             }
             else
             {
-                std::string aspect_ratio = line.substr(line.find('A') + 1);
-
-                aspect_ratio[0] = std::stoi(aspect_ratio.substr(0, aspect_ratio.find(':')));
-                aspect_ratio[1] = std::stoi(aspect_ratio.substr(aspect_ratio.find(':') + 1));
+                String aspect_ratio_str = line.substr(line.find('A'));
+                aspect_ratio[0] = stoi(aspect_ratio_str.substr(1, aspect_ratio_str.find(':') - 1));
+                aspect_ratio[1] = stoi(aspect_ratio_str.substr(aspect_ratio_str.find(':') + 1, aspect_ratio_str.find(' ') - 1));
             }
 
             
@@ -119,11 +121,14 @@ class yuv_file_handler
             while (std::getline(file, line))
                 if (line.find("FRAME") != std::string::npos)
                     frame_count++;
+            
             file.clear();
             file.seekg(0);
         }
 
         Mat get_frame(int n) {
+            file.clear();
+            file.seekg(0);
             Mat pixels = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
             int count = 0;
             std::string line;
@@ -172,52 +177,6 @@ class yuv_file_handler
         ColorSpace get_color_space()
         {
             return color_space;
-        }
-
-        void yuv_writer(const std::string &file_name)
-        {
-            file.open(file_name, std::ios::out | std::ios::binary);
-            if (!file.is_open())
-                throw std::runtime_error(file_name + " - could not be opened for writing.");
-
-            // Write YUV file header
-            file << "W" << this->resolution[0] << " H" << this->resolution[1] << " F30 C";
-
-            switch (this->color_space)
-            {
-                case ColorSpace::C420jpeg:
-                    file << "420jpeg";
-                    break;
-                case ColorSpace::C420paldv:
-                    file << "420paldv";
-                    break;
-                // missing some cases
-
-                default:
-                    file << "420"; // Default to C420 if not specified
-                }
-
-            file << " I" << "Ip A1:1\n";
-        }
-
-        void write_frame(const std::string &file_name, const Mat &frame)
-        {
-            file.open(file_name, std::ios::out | std::ios::binary | std::ios::app);
-            if (!file.is_open())
-                throw std::runtime_error(file_name + " - could not be opened for writing.");
-            
-            // Write the "FRAME" header
-            file << "FRAME\n";
-
-            // Write YUV frame data
-            for (int h = 0; h < frame.rows; ++h)
-            {
-                for (int w = 0; w < frame.cols; ++w)
-                {
-                    char pixel_value = frame.at<uchar>(h, w);
-                    file.write(&pixel_value, 1);
-                }
-            }
         }
         
 };
