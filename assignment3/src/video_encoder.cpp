@@ -48,6 +48,18 @@ Mat get_block(Mat frame, int x, int y) {
     return block;
 }
 
+void set_block(Mat *frame, Mat block, int x, int y) {
+    int block_heigth = heigth;
+    int block_width = width;
+    if (((x+1)*width)>=frame->cols) block_heigth = frame->cols - x*width;
+    if (((y+1)*heigth)>=frame->rows) block_width = frame->rows - y*heigth;
+    for (int h = 0; h < block_heigth; h++) {
+        for (int w = 0; w < block_width; h++) {
+            frame->at<uchar>((y*heigth)+h, (x*width)+w) = block.at<uchar>(h,w);
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {   
     int method = 0;
