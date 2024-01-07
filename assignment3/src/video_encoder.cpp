@@ -1,15 +1,12 @@
 #include <iostream>
 #include "yuv_reader.h"
 #include "golomb.h"
+#include "grid.h"
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace cv;
-
-int* resolution;
-int heigth = 1;
-int width = 1;
 
 vector<int> intra_prediction(Mat frame) {
     vector<int> pred(frame.cols*frame.rows);
@@ -34,32 +31,6 @@ vector<int> inter_prediction(Mat frame, Mat framePrevious) {
     return pred;
 }
 
-Mat get_block(Mat frame, int x, int y) {
-    int block_heigth = heigth;
-    int block_width = width;
-    if (((x+1)*width)>=frame.cols) block_heigth = frame.cols - x*width;
-    if (((y+1)*heigth)>=frame.rows) block_width = frame.rows - y*heigth;
-    Mat block = Mat::zeros(block_heigth, block_width, CV_8UC1);
-    for (int h = 0; h < block_heigth; h++) {
-        for (int w = 0; w < block_width; h++) {
-            block.at<uchar>(h,w) = frame.at<uchar>((y*heigth)+h, (x*width)+w);
-        }
-    }
-    return block;
-}
-
-void set_block(Mat *frame, Mat block, int x, int y) {
-    int block_heigth = heigth;
-    int block_width = width;
-    if (((x+1)*width)>=frame->cols) block_heigth = frame->cols - x*width;
-    if (((y+1)*heigth)>=frame->rows) block_width = frame->rows - y*heigth;
-    for (int h = 0; h < block_heigth; h++) {
-        for (int w = 0; w < block_width; h++) {
-            frame->at<uchar>((y*heigth)+h, (x*width)+w) = block.at<uchar>(h,w);
-        }
-    }
-}
-
 int main(int argc, char *argv[])
 {   
     int method = 0;
@@ -69,6 +40,8 @@ int main(int argc, char *argv[])
         return 1;
     }
     bool inter = false;
+    int heigth = 1;
+    int width = 1;
     int periodicity = 1;
     for (int n = 1; n < argc; n++) {
         if(string(argv[n]) == "-h") {
@@ -86,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     yuv_reader image = yuv_reader(argv[argc-2]);
-    resolution = image.get_resolution();
+    int* resolution = image.get_resolution();
     int frame_count = image.get_frame_count();
 
     BitStream bitstreamOutput {argv[argc-1], 0};
@@ -107,19 +80,17 @@ int main(int argc, char *argv[])
         bitstreamOutput.write(periodicity, 16);
     }
 
-    int grid[2];
-    grid[0] = ceil(resolution[0]/width);
-    grid[1] = ceil(resolution[1]/heigth);
-
     Mat frame;
     Mat framePrevious;
     for (int i = 0; i < frame_count; i++) {
         vector<int> pred(resolution[0]*resolution[1]);
         frame = image.get_frame(i);
         if (inter && i%periodicity!=0) {
-            for (int x = 0; x < grid[0]; x++) {
-                for (int y = 0; y < grid[1]; y++) {
-                    Mat block = get_block(frame, x, y);
+            Grid grid { frame, heigth, width };
+            Grid gridPrevious { framePrevious, heigth, width };
+            for (int x = 0; x < grid.heigth(); x++) {
+                for (int y = 0; y < grid.width(); y++) {
+                    Mat block = grid.block(x, y);
                     int best_size = INT32_MAX;
                     int bestX = -1;
                     int bestY = -1;
@@ -129,9 +100,9 @@ int main(int argc, char *argv[])
                     int m = Golomb::idealM(local_pred);
                     Golomb g = Golomb(bitstreamOutput, m, method);
                     best_size = g.getEncodedLength(local_pred);
-                    for (int xP = 0; xP < grid[0]; xP++) {
-                        for (int yP = 0; yP < grid[1]; yP++) {
-                            local_pred = inter_prediction(block, get_block(framePrevious, xP, yP));
+                    for (int xP = 0; xP < grid.heigth(); xP++) {
+                        for (int yP = 0; yP < grid.width(); yP++) {
+                            local_pred = inter_prediction(block, gridPrevious.block(xP, yP));
                             int m = Golomb::idealM(local_pred);
                             Golomb g = Golomb(bitstreamOutput, m, method);
                             int local_size = g.getEncodedLength(local_pred);
