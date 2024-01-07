@@ -1,11 +1,37 @@
 #include <iostream>
 #include "yuv_writer.h"
 #include "golomb.h"
+#include "grid.h"
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace cv;
+
+Mat intra_prediction(Golomb g, int* resolution) {
+    Mat frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
+    for (int h = 0; h < resolution[1]; h++) {
+        for (int w = 0; w < resolution[0]; w++) {
+            int p = g.decode();
+            if (h==0 && w==0) frame.at<uchar>(h,w) = p;
+            else if (h==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h,w-1)/3);
+            else if (w==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h-1,w)/3);
+            else frame.at<uchar>(h,w) = p + ((frame.at<uchar>(h-1,w-1)+frame.at<uchar>(h-1,w)+frame.at<uchar>(h,w-1))/3);
+        }
+    }
+    return frame;
+}
+
+Mat inter_prediction(Golomb g, int* resolution, Mat blockPrevious) {
+    Mat frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
+    for (int h = 0; h < resolution[1]; h++) {
+        for (int w = 0; w < resolution[0]; w++) {
+            int p = g.decode();
+            frame.at<uchar>(h,w) = p + blockPrevious.at<uchar>(h,w);
+        }
+    }
+    return frame;
+}
 
 int main(int argc, char *argv[])
 {   
@@ -48,33 +74,32 @@ int main(int argc, char *argv[])
     image.set_interlace(interlace);
     image.write_header();
 
-    int grid[2];
-    grid[0] = ceil(resolution[0]/width);
-    grid[1] = ceil(resolution[1]/heigth);
-
     Mat frame;
     Mat framePrevious;
     for (int i = 0; i < frame_count; i++) {
         frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
+        int m = bitstreamInput.readInt(16);
+        Golomb g = Golomb(bitstreamInput, m, method);
         if (inter && i%periodicity!=0) {
-            for (int x = 0; x < grid[0]; x++) {
-                for (int y = 0; y < grid[1]; y++) {
-                    //TODO
+            Grid grid { frame, heigth, width };
+            Grid gridPrevious { framePrevious, heigth, width };
+            for (int y = 0; y < grid.heigth(); y++) {
+                for (int x = 0; x < grid.width(); x++) {
+                    bool type = bitstreamInput.read();
+                    if (type) {
+                        int xP = g.decode();
+                        int yP = g.decode();
+                        Mat blockPrevious = gridPrevious.block(xP, yP);
+                        grid.set_block(inter_prediction(g, resolution, blockPrevious), x, y);
+                    }
+                    else {
+                        grid.set_block(intra_prediction(g, resolution), x, y);
+                    }
                 }
             }
         }
         else {
-            int m = bitstreamInput.readInt(16);
-            Golomb g = Golomb(bitstreamInput, m, method);
-            for (int h = 0; h < resolution[1]; h++) {
-                for (int w = 0; w < resolution[0]; w++) {
-                    int p = g.decode();
-                    if (h==0 && w==0) frame.at<uchar>(h,w) = p;
-                    else if (h==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h,w-1)/3);
-                    else if (w==0) frame.at<uchar>(h,w) = p + (frame.at<uchar>(h-1,w)/3);
-                    else frame.at<uchar>(h,w) = p + ((frame.at<uchar>(h-1,w-1)+frame.at<uchar>(h-1,w)+frame.at<uchar>(h,w-1))/3);
-                }
-            }
+            frame = intra_prediction(g, resolution);
         }
         image.write_frame(frame);
         framePrevious = frame;

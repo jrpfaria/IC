@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
         if (inter && i%periodicity!=0) {
             Grid grid { frame, heigth, width };
             Grid gridPrevious { framePrevious, heigth, width };
-            for (int x = 0; x < grid.heigth(); x++) {
-                for (int y = 0; y < grid.width(); y++) {
+            for (int x = 0; x < grid.width(); x++) {
+                for (int y = 0; y < grid.heigth(); y++) {
                     Mat block = grid.block(x, y);
                     int best_size = INT32_MAX;
                     int bestX = -1;
@@ -97,11 +97,13 @@ int main(int argc, char *argv[])
                     vector<int> best_pred(heigth*width);
                     vector<int> local_pred(heigth*width);
                     best_pred = intra_prediction(block);
-                    int m = Golomb::idealM(local_pred);
-                    Golomb g = Golomb(bitstreamOutput, m, method);
-                    best_size = g.getEncodedLength(local_pred);
-                    for (int xP = 0; xP < grid.heigth(); xP++) {
-                        for (int yP = 0; yP < grid.width(); yP++) {
+                    {
+                        int m = Golomb::idealM(local_pred);
+                        Golomb g = Golomb(bitstreamOutput, m, method);
+                        best_size = g.getEncodedLength(local_pred);
+                    }
+                    for (int xP = 0; xP < grid.width(); xP++) {
+                        for (int yP = 0; yP < grid.heigth(); yP++) {
                             local_pred = inter_prediction(block, gridPrevious.block(xP, yP));
                             int m = Golomb::idealM(local_pred);
                             Golomb g = Golomb(bitstreamOutput, m, method);
@@ -120,6 +122,8 @@ int main(int argc, char *argv[])
                         bitstreamOutput.write(bestX);
                         bitstreamOutput.write(bestY);
                     }
+                    int m = Golomb::idealM(pred);
+                    Golomb g = Golomb(bitstreamOutput, m, method);
                     for (auto p: pred) g.encode(p);
                 }
             }
