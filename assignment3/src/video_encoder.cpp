@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
         if (inter && i%periodicity!=0) {
             Grid grid { frame, heigth, width };
             Grid gridPrevious { framePrevious, heigth, width };
-            for (int x = 0; x < grid.width(); x++) {
-                for (int y = 0; y < grid.heigth(); y++) {
+            for (int y = 0; y < grid.heigth(); y++) {
+                for (int x = 0; x < grid.width(); x++) {
                     Mat block = grid.block(x, y);
                     int best_size = INT32_MAX;
                     int bestX = -1;
@@ -104,16 +104,19 @@ int main(int argc, char *argv[])
                     }
                     for (int xP = 0; xP < grid.width(); xP++) {
                         for (int yP = 0; yP < grid.heigth(); yP++) {
-                            local_pred = inter_prediction(block, gridPrevious.block(xP, yP));
-                            int m = Golomb::idealM(local_pred);
-                            Golomb g = Golomb(bitstreamOutput, m, method);
-                            int local_size = g.getEncodedLength(local_pred);
-                            if (local_size<best_size) {
-                                best_pred = local_pred;
-                                best_size = local_size;
-                                bestX = xP;
-                                bestY = yP;
+                            try {
+                                local_pred = inter_prediction(block, gridPrevious.block(xP, yP));
+                                int m = Golomb::idealM(local_pred);
+                                Golomb g = Golomb(bitstreamOutput, m, method);
+                                int local_size = g.getEncodedLength(local_pred);
+                                if (local_size<best_size) {
+                                    best_pred = local_pred;
+                                    best_size = local_size;
+                                    bestX = xP;
+                                    bestY = yP;
+                                }
                             }
+                            catch (const exception &) {}
                         }
                     }
                     if (bestX==-1 || bestY==-1) bitstreamOutput.write(0);

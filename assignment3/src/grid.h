@@ -29,14 +29,10 @@ class Grid {
         Mat block(int x, int y) {
             int local_heigth = block_heigth;
             int local_width = block_width;
-            if (((x+1)*block_width)>=frame.cols) local_heigth = frame.cols - x*block_width;
-            if (((y+1)*block_heigth)>=frame.rows) local_width = frame.rows - y*block_heigth;
-            Mat block = Mat::zeros(local_heigth, local_width, CV_8UC1);
-            for (int h = 0; h < local_heigth; h++) {
-                for (int w = 0; w < local_width; h++) {
-                    block.at<uchar>(h,w) = frame.at<uchar>((y*block_heigth)+h, (x*block_width)+w);
-                }
-            }
+            if ((x+1)*block_width>frame.cols) local_width = frame.cols - x*block_width;
+            if ((y+1)*block_heigth>frame.rows) local_heigth = frame.rows - y*block_heigth;
+            Rect rect = Rect(local_width,local_heigth,x*block_width,y*block_heigth);
+            Mat block = frame(rect).clone();
             return block;
         }
 
