@@ -22,3 +22,6 @@ target_link_libraries (video_encoder ${OpenCV_LIBS})
 
 add_executable (video_decoder video_decoder.cpp)
 target_link_libraries (video_decoder ${OpenCV_LIBS})
+
+add_executable (video_cmp video_cmp.cpp)
+target_link_libraries (video_cmp ${OpenCV_LIBS})
