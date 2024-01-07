@@ -77,18 +77,21 @@ int main(int argc, char *argv[])
     Mat frame;
     Mat framePrevious;
     for (int i = 0; i < frame_count; i++) {
+        std::cout << "frame: " << i << std::endl;
         frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
-        int m = bitstreamInput.readInt(16);
-        Golomb g = Golomb(bitstreamInput, m, method);
         if (inter && i%periodicity!=0) {
             Grid grid { frame, heigth, width };
             Grid gridPrevious { framePrevious, heigth, width };
             for (int y = 0; y < grid.heigth(); y++) {
                 for (int x = 0; x < grid.width(); x++) {
+                    int m = bitstreamInput.readInt(16);
+                    Golomb g = Golomb(bitstreamInput, m, method);
                     bool type = bitstreamInput.read();
                     if (type) {
+                        std::cout << "check: " << bitstreamInput.readInt(16) << std::endl;
                         int xP = bitstreamInput.readInt(16);
                         int yP = bitstreamInput.readInt(16);
+                        std::cout << "x:" << xP << " y:" << yP << std::endl;
                         Mat blockPrevious = gridPrevious.block(xP, yP);
                         grid.set_block(inter_prediction(g, blockPrevious), x, y);
                     }
@@ -99,10 +102,16 @@ int main(int argc, char *argv[])
             }
         }
         else {
+            int m = bitstreamInput.readInt(16);
+            Golomb g = Golomb(bitstreamInput, m, method);
+            std::cout << "intra" << std::endl;
             frame = intra_prediction(g, resolution);
+            std::cout << "done" << std::endl;
         }
+        std::cout << "write" << std::endl;
         image.write_frame(frame);
-        framePrevious = frame;
+        framePrevious = frame.clone();
+        std::cout << "done" << std::endl;
     }
 
     image.close();
