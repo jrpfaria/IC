@@ -143,6 +143,9 @@ class yuv_writer
         std::vector<unsigned char> mat_to_yuv(Mat frame, ColorSpace color_space)
         {
             std::vector<unsigned char> frame_data;
+
+            unsigned char uv_value = (unsigned char)127; // 127 is the default value for U and V
+            unsigned char alpha_value = (unsigned char)255; // 255 is the default value for alpha
             
             // Write Y data
             for (int h = 0; h < frame.rows; h++)
@@ -161,26 +164,26 @@ class yuv_writer
                 case C420jpeg:
                 case C420: // 4:2:0 (width*height*3/2)
                     for (int i = 0; i < (frame.rows*frame.cols) / 2; i++)
-                        frame_data.push_back((unsigned char)127);
+                        frame_data.push_back(uv_value);
                     break;
 
                 case C422: // 4:2:2 (width*height*2)
                     for (int i = 0; i < frame.rows*frame.cols; i++)
-                        frame_data.push_back((unsigned char)127);
+                        frame_data.push_back(uv_value);
                     break;
 
                 case C444: // 4:4:4 (width*height*3)
                     for (int i = 0; i < frame.rows*frame.cols; i++)
-                        frame_data.push_back((unsigned char)127),
-                        frame_data.push_back((unsigned char)127);
+                        frame_data.push_back(uv_value),
+                        frame_data.push_back(uv_value);
                     break;
                 
                 case C444alpha: // 4:4:4:4 (width*height*4)
                     for (int i = 0; i < frame.rows*frame.cols; i++)
-                        frame_data.push_back((unsigned char)127),
-                        frame_data.push_back((unsigned char)127);
+                        frame_data.push_back(uv_value),
+                        frame_data.push_back(uv_value);
                     for (int i = 0; i < frame.rows*frame.cols; i++)
-                        frame_data.push_back((unsigned char)255);
+                        frame_data.push_back(alpha_value);
                     break;
 
                 default:
