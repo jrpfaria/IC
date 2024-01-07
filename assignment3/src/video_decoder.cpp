@@ -22,10 +22,10 @@ Mat intra_prediction(Golomb g, int* resolution) {
     return frame;
 }
 
-Mat inter_prediction(Golomb g, int* resolution, Mat blockPrevious) {
-    Mat frame = Mat::zeros(resolution[1], resolution[0], CV_8UC1);
-    for (int h = 0; h < resolution[1]; h++) {
-        for (int w = 0; w < resolution[0]; w++) {
+Mat inter_prediction(Golomb g, Mat blockPrevious) {
+    Mat frame = Mat::zeros(blockPrevious.rows, blockPrevious.cols, CV_8UC1);
+    for (int h = 0; h < blockPrevious.rows; h++) {
+        for (int w = 0; w < blockPrevious.cols; w++) {
             int p = g.decode();
             frame.at<uchar>(h,w) = p + blockPrevious.at<uchar>(h,w);
         }
@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
     int frame_count = bitstreamInput.readInt(16);
     ColorSpace color_space = ColorSpace(bitstreamInput.readInt(16));
     Interlace interlace = Interlace(bitstreamInput.readInt(16));
-    int method = bitstreamInput.readInt(16);
-    bool inter = bitstreamInput.readInt(1);
+    int method = bitstreamInput.read();
+    bool inter = bitstreamInput.read();
     if (inter) {
         heigth = bitstreamInput.readInt(16);
         width = bitstreamInput.readInt(16);
@@ -87,10 +87,10 @@ int main(int argc, char *argv[])
                 for (int x = 0; x < grid.width(); x++) {
                     bool type = bitstreamInput.read();
                     if (type) {
-                        int xP = g.decode();
-                        int yP = g.decode();
+                        int xP = bitstreamInput.readInt(16);
+                        int yP = bitstreamInput.readInt(16);
                         Mat blockPrevious = gridPrevious.block(xP, yP);
-                        grid.set_block(inter_prediction(g, resolution, blockPrevious), x, y);
+                        grid.set_block(inter_prediction(g, blockPrevious), x, y);
                     }
                     else {
                         grid.set_block(intra_prediction(g, resolution), x, y);

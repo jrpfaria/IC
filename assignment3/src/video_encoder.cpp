@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
     yuv_reader image = yuv_reader(argv[argc-2]);
     int* resolution = image.get_resolution();
     int frame_count = image.get_frame_count();
-
     BitStream bitstreamOutput {argv[argc-1], 0};
     bitstreamOutput.write(resolution[0],16);
     bitstreamOutput.write(resolution[1],16);
@@ -72,7 +71,7 @@ int main(int argc, char *argv[])
     bitstreamOutput.write(image.get_frame_count(),16);
     bitstreamOutput.write(ColorSpace::Cmono,16);
     bitstreamOutput.write(image.get_interlace(),16);
-    bitstreamOutput.write(method,16);
+    bitstreamOutput.write(method);
     bitstreamOutput.write(inter);
     if (inter) {
         bitstreamOutput.write(heigth, 16);
@@ -94,9 +93,8 @@ int main(int argc, char *argv[])
                     int best_size = INT32_MAX;
                     int bestX = -1;
                     int bestY = -1;
-                    vector<int> best_pred(heigth*width);
                     vector<int> local_pred(heigth*width);
-                    best_pred = intra_prediction(block);
+                    vector<int> best_pred = intra_prediction(block);
                     {
                         int m = Golomb::idealM(local_pred);
                         Golomb g = Golomb(bitstreamOutput, m, method);
@@ -119,15 +117,16 @@ int main(int argc, char *argv[])
                             catch (const exception &) {}
                         }
                     }
+                    int m = Golomb::idealM(best_pred);
+                    Golomb g = Golomb(bitstreamOutput, m, method);
+                    bitstreamOutput.write(m, 16);
                     if (bestX==-1 || bestY==-1) bitstreamOutput.write(0);
                     else {
                         bitstreamOutput.write(1);
-                        bitstreamOutput.write(bestX);
-                        bitstreamOutput.write(bestY);
+                        bitstreamOutput.write(bestX, 16);
+                        bitstreamOutput.write(bestY, 16);
                     }
-                    int m = Golomb::idealM(pred);
-                    Golomb g = Golomb(bitstreamOutput, m, method);
-                    for (auto p: pred) g.encode(p);
+                    for (auto p: best_pred) g.encode(p);
                 }
             }
         }
