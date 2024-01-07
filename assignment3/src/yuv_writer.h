@@ -137,6 +137,58 @@ class yuv_writer
         {
             this->color_space = color_space;
         }
+
+        // \brief Takes a Mat object and converts it to a vector of unsigned chars in YUV format
+        // TODO: usar bitstream
+        std::vector<unsigned char> mat_to_yuv(Mat frame, ColorSpace color_space)
+        {
+            std::vector<unsigned char> frame_data;
+            
+            // Write Y data
+            for (int h = 0; h < frame.rows; h++)
+            {
+                for (int w = 0; w < frame.cols; w++)
+                {
+                    frame_data.push_back(frame.at<uchar>(h, w));
+                }
+            }
+
+            // Write U and V data
+            switch (color_space)
+            {
+                case C420mpeg2:
+                case C420paldv:
+                case C420jpeg:
+                case C420: // 4:2:0 (width*height*3/2)
+                    for (int i = 0; i < (frame.rows*frame.cols) / 2; i++)
+                        frame_data.push_back((unsigned char)127);
+                    break;
+
+                case C422: // 4:2:2 (width*height*2)
+                    for (int i = 0; i < frame.rows*frame.cols; i++)
+                        frame_data.push_back((unsigned char)127);
+                    break;
+
+                case C444: // 4:4:4 (width*height*3)
+                    for (int i = 0; i < frame.rows*frame.cols; i++)
+                        frame_data.push_back((unsigned char)127),
+                        frame_data.push_back((unsigned char)127);
+                    break;
+                
+                case C444alpha: // 4:4:4:4 (width*height*4)
+                    for (int i = 0; i < frame.rows*frame.cols; i++)
+                        frame_data.push_back((unsigned char)127),
+                        frame_data.push_back((unsigned char)127);
+                    for (int i = 0; i < frame.rows*frame.cols; i++)
+                        frame_data.push_back((unsigned char)255);
+                    break;
+
+                default:
+                    break;
+            }
+
+            return frame_data;
+        }
         
 };
 
