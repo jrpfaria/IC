@@ -123,7 +123,6 @@ int main(int argc, char *argv[])
                     if (bestX==-1 || bestY==-1) bitstreamOutput.write(0);
                     else {
                         bitstreamOutput.write(1);
-                        bitstreamOutput.write(123,16);
                         bitstreamOutput.write(bestX, 16);
                         bitstreamOutput.write(bestY, 16);
                     }
